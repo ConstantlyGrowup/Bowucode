@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>线上博物馆</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-touch-fullscreen" content="yes">
+		<meta name="HandheldFriendly" content="True">
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
+		<!-- Bootstrap v4.3.1 CSS -->
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/theme.css">
+		<!-- Slick CSS -->
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
+		<!-- Magnific Popup core CSS file -->
+		<link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
+		<!-- Font Awesome Free 5.10.2 CSS JS -->
+		<link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
+        <script src="./util/vue.js"></script>
+        <script src="./util/axios.js"></script>
+        <script src="./util/request.js"></script>
+        <style scoped>
+            /* CSS样式 */
+            .popup {
+                position: fixed; /* 设置定位为fixed，使其相对于视口进行定位 */
+                top: 50%; /* 将垂直居中 */
+                left: 50%; /* 将水平居中 */
+                transform: translate(-50%, -50%); /* 通过transform属性移动到正确的位置 */
+                width: 80%; /* 设置宽度 */
+                height: 50vh; /* 设置高度 */
+                overflow-y: auto;
+                background-color: #fff; /* 设置背景色 */
+                border: 1px solid #ccc; /* 设置边框 */
+                padding: 10px; /* 设置内边距 */
+                z-index: 9999;
+            }
+        </style>
+	</head>
+<body class="default">
+		<div class="preloading">
+			<div class="wrap-preload">
+				<div class="cssload-loader"></div>
+			</div>
+		</div>
+			<!-- Header  -->
+        <div id="loginVue">
+            <nav class="navbar navbar-expand-lg navbar-light bg-header">
+                <div class="container-fluid">
+                    <div class="logo">
+                        线上博物馆
+                        <span style="float: right" v-if="userInf.id == null">
+                            <a type="button" class="theme-button" href="login.html" style="font-size: 10px">登录</a>
+                        </span>
+                        <span style="float: right;font-size: 10px;" v-if="userInf.id != null">
+                            <a type="button" class="theme-button" href="setting.html" style="font-size: 10px">欢迎：{{userInf.username}}</a>
+                            <a type="button" class="theme-button" href="javascript:void(0)" @click="loginOut()" style="font-size: 10px">登出</a>
+                        </span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+			<!-- .Header  -->
+			<!-- Content  -->
+			<div id="content">
+				<!-- Content Wrap  -->
+				<div class="content-wrap">
+					<!-- slider -->
+					<div class="img-hero">
+						<div>
+							<img src="img/slide-index1.jpg" alt="slider">
+						</div>
+						<div>
+							<img src="img/slide-index2.jpg" alt="slider">
+						</div>
+					</div>
+                    <div id="app">
+					<div class="home-icon">
+						<div class="section-home">
+							<div class="container">
+								<div class="row">
+                                    <div class="col s-icon" v-for="(item, index) in colTyps" v-if="index<=4" @click="gotoDetial(item.dicValue)">
+                                        <a href="javascript:void(0)"  class="homepage-icon-menu">
+                                            <img :src="'img/m' + (index+1) + '.png'" alt="icon">
+                                            <div class="s-icon-text">
+                                                {{item.dicValue}}
+                                            </div>
+                                        </a>
+                                    </div>
+								</div>
+                                <div class="row">
+                                    <div class="col s-icon" v-for="(item, index) in colTyps" v-if="index>4 && index<=8" @click="gotoDetial(item.dicValue)">
+                                        <a href="javascript:void(0)" class="homepage-icon-menu">
+                                            <img :src="'img/m' + (index+1) + '.png'" alt="icon">
+                                            <div class="s-icon-text">
+                                                {{item.dicValue}}
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+							</div>
+						</div>
+					</div>
+					<div class="heading-section" style="display: flex">
+						<div v-for="item in menuData" :key="item.id" :id="item" @click="checkMenu(item)" :class="{'ischeck': item.id === menuId}" style="padding: 10px;font-size: 15px;cursor: pointer">{{item.name}}</div>
+					</div>
+                        <div class="row" style="max-height: 80vh;overflow-y: auto">
+                            <div v-if="showReservePop" class="popup">
+                                <a href="#" style="float: right" @click="showReservePop = false">关闭</a>
+                                <dv>
+                                    <button @click="showReservePop = false">关闭</button>
+                                </dv>
+                                <p v-html="popHtml"></p>
+                            </div>
+                        </div>
+                        <div class="row" style="max-height: 80vh;overflow-y: auto">
+                            <div v-if="showAnnooucementPop" class="popup">
+                                <a href="#" style="float: right" @click="showAnnooucementPop = false">关闭</a>
+                                <div class="subsite-heading">
+                                    {{annoObj.title}}
+                                </div>
+                                <p v-html="annoObj.contentText"></p>
+                            </div>
+                        </div>
+					<div class="section-home home-news">
+                        <div id="newsItem" class="home-news-wrap">
+                            <!-- 藏品列表-->
+                            <div>
+                                <a :href="'collDetail.html?id='+item.id" v-for="(item, index) in collectionData" v-if="item.origin">
+                                    <div class="news-item" @mouseenter="handleMouseEnter(item)" @mouseleave="handleMouseLeave(item)">
+                                        <div class="news-content" style="display: flex;">
+                                            <div class="hnw-img">
+                                                <img style="max-width: 70px;max-height: 70px" :src="'http://localhost:8090/api/file/getPic?name=' + item.colPic" alt="news">
+                                            </div>
+                                            <div class="hnw-desc">
+                                                <div style="font-weight: bold">{{item.title}}</div>
+                                                <div class="hnw-text">
+                                                    <p v-html="item.desColl.length>100?item.desColl.slice(0,100)+'...' : item.desColl"></p>
+                                                    <span class="more">查看详情</span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class=" more-category" v-if="collectionData && collectionData[0].origin">
+                                    <a href="col-list.html"><div class="theme-button mcbutton">查看更多</div></a>
+                                </div>
+                            </div>
+
+
+						</div>
+					</div>
+					<div class="section-subscribe">
+						<div class="subcontainer">
+							<div class="subrow">
+								<div class="subcol">
+									<div class="section-title">留言建议</div>
+									<div class="mail-subscribe-box">
+										<form name="subsribe">
+											<input v-model="feedContext" class="form-control" name="user-email" placeholder="如需改进，欢迎小主反馈...." value="" type="email">
+											<button @click="sendFeedBack()" type="button" class="submitsub"> <i class="fa fa-angle-right"></i></button>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="bg-subscribe">
+							<img src="img/image.jpg" alt="banner">
+						</div>
+					</div>
+                </div>
+				</div>
+			</div>
+			<!-- .Content  -->
+			<!-- 底部面板  -->
+			<div class="bottom-panel">
+				<div class="bp-col">
+					<a href="index.html">
+						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+						<div class="bp-text">首页</div>
+					</a>
+				</div>
+                <div class="bp-col">
+                    <a href="col-list.html">
+                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+                        <div class="bp-text">藏品</div>
+                    </a>
+                </div>
+				<div class="bp-col">
+					<a href="myReserveDetail.html">
+						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+						<div class="bp-text">我的预约</div>
+					</a>
+				</div>
+				<div class="bp-col">
+					<a href="setting.html">
+						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+						<div class="bp-text">个人中心</div>
+					</a>
+				</div>
+			</div>
+			<!-- .Bottom Panel  -->
+			<div class="overlay"></div>
+			<!-- Optional JavaScript -->
+			<!-- jQuery v3.4.1 -->
+			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+			<!--  Bootstrap v4.3.1 JS -->
+			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+			<!-- Magnific Popup core JS file -->
+			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+			<!-- Slick JS -->
+			<script src="lib/slick/slick/slick.min.js"></script>
+			<!--  Custom JS -->
+			<script src="js/theme.js"></script>
+
+            <script src="lib/elementui/element.js"></script>
+            <script src="lib/elementui/css/element.css"></script>
+        <script>
+            const vm = new Vue({
+                el: '#app',
+                data: {
+                    menuData: [
+                        { id: 1, name: '近期展览' },
+                        { id: 2, name: '热门展览' },
+                        // { id: 3, name: '近期解说' },
+                        // { id: 4, name: '热门解说' }
+                    ],
+                    showAnnooucementPop: false,
+                    annoObj: {},
+                    menuId: 1,
+                    colTyps : [],
+                    collectionData : [],
+                    queryInfo: {
+                        name: '',
+                        pagenum: 1,
+                        pagesize: 8,
+                        menuName: '近期展览'
+                    },
+                    feedContext: '',
+                    userInf: {},
+                    isNewsDesc: false,
+                    collectionDataDesc: {},
+                    resSum: 0,
+                    resdSum: 0,
+                    feedContext: '',
+                    showReservePop: false,
+                    popHtml: '',
+                    announcementList: []
+                },
+                mounted() {
+                    this.getData()
+                    this.getColData()
+                    const userStr = sessionStorage.getItem('user')
+                    if(userStr !== '' && null != userStr) {
+                        const user = JSON.parse(userStr)
+                        this.userInf = user
+                    }
+                    this.getAnnouncementList()
+                },
+                methods: {
+                    checkMenu(item) {
+                        this.menuId = item.id
+                        this.queryInfo.menuName = item.name
+                        this.getColData()
+                    },
+                    showPop(item) {
+                        this.showReservePop = true
+                        this.popHtml = item.resDes
+                    },
+                    addDetail(val) {
+                        const userStr = sessionStorage.getItem('user')
+                        if(userStr==null || userStr === '') {
+                            window.location.href='login.html'
+                            return
+                        }
+                        const user = JSON.parse(userStr)
+                        const detail = {
+                            userId: user.id,
+                            userName: user.username,
+                            resId: val.id,
+                            cateId: val.cateId,
+                            cateTitle:  this.collectionData.title,
+                            resType:  val.resType,
+                            resDate:  val.resDate,
+                            resTime:  val.resTime,
+                            resSession:  val.resSession
+                        }
+                        post('/reserveDetail/addDetail', detail).then(response => {
+                            if(response.code === 200) {
+                                this.getColData()
+                                alert('成功！')
+                            }else {
+                                alert(response.msg)
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    // 鼠标移入
+                    handleMouseEnter(item) {
+                        if(item.origin) {
+                            this.listMsReserve(item.id)
+                        }
+                        const newsContent = document.getElementById(item.id); // 使用id获取HTML元素
+                        newsContent.style.display = 'block'
+                    },
+                    handleMouseLeave(item) {
+                        const newsContent = document.getElementById(item.id); // 使用id获取HTML元素
+                        newsContent.style.display = 'none'
+                    },
+                    getData() {
+                        post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
+                            this.colTyps = response.data;
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    async getAnnouncementList() {
+                        post('announcement/listMsAnnouncementTop', {}).then(res => {
+                            if (res.code !== 200) {
+                                alert(res.msg)
+                                return
+                            }else {
+                                this.announcementList = res.data.list
+                                if(this.announcementList && this.announcementList.length > 0) {
+                                    this.showAnnooucementPop = true
+                                    this.annoObj = this.announcementList[0]
+                                }
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    getColData() {
+                        post('/collect/getdataTop', this.queryInfo).then(response => {
+                            this.collectionData = response.data.list;
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    listMsReserve(id) {
+                        this.resSum = 0
+                        this.resdSum = 0
+                        post('/reserve/listMsReserve', {cateId: id}).then(response => {
+                            this.collectionDataDesc = response.data.list;
+                            this.collectionDataDesc.forEach(r => {
+                                this.resSum += r.resSum
+                                if(r.resdSum !== null) {
+                                    this.resdSum += r.resdSum
+                                }
+                            })
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    gotoDetial(value) {
+                        value = encodeURI(value)
+                        window.location.href='col-list.html?type='+ value
+                    },
+                    sendFeedBack(value) {
+                        const userStr = sessionStorage.getItem('user')
+                        if(userStr === null || userStr === '') {
+                            window.location.href='login.html'
+                            return
+                        }
+                        const user = JSON.parse(userStr)
+                        if(this.feedContext === '') {
+                            alert('请输入留言信息')
+                            return;
+                        }
+                        console.log(user)
+                        const info = {
+                            userId: user.id,
+                            cateId: '',
+                            feedContent: this.feedContext,
+                            userName: user.username
+                        }
+                        post('/feedBack/addFeedBack', info).then(response => {
+                            alert('成功！')
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    }
+                }
+            })
+            const vm2 = new Vue({
+                el: '#loginVue',
+                data: {
+                    userInf: {}
+                },
+                mounted() {
+                    const userStr = sessionStorage.getItem('user')
+                    if(userStr !== '' && null != userStr) {
+                        const user = JSON.parse(userStr)
+                        this.userInf = user
+                    }
+                },
+                methods: {
+                    loginOut() {
+                        sessionStorage.clear()
+                        window.location.href='login.html'
+                    }
+                }
+            })
+        </script>
+        <style>
+            .ischeck {
+                font-weight: bold;
+                color: #452F2E;
+            }
+        </style>
+</body>
+</html>

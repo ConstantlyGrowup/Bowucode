@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<title>线上博物馆</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-touch-fullscreen" content="yes">
+		<meta name="HandheldFriendly" content="True">
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
+		<!-- Bootstrap v4.3.1 CSS -->
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/theme.css">
+		<!-- Slick CSS -->
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
+		<!-- Magnific Popup core CSS file -->
+		<link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
+		<!-- Font Awesome Free 5.10.2 CSS JS -->
+		<link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
+        <script src="./util/vue.js"></script>
+        <script src="./util/axios.js"></script>
+        <script src="./util/request.js"></script>
+        <style scoped>
+            .popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 100%;
+                height: 80vh;
+                background-color: #fff;
+                border: 1px solid #ccc;
+                padding: 10px;
+            }
+            .valid {
+                color: green;
+            }
+            .invalid {
+                color: red;
+            }
+        </style>
+    </head>
+<body class="default">
+		<div class="preloading">
+			<div class="wrap-preload">
+				<div class="cssload-loader"></div>
+			</div>
+		</div>
+			<!-- Header  -->
+			<nav class="navbar navbar-expand-lg navbar-light bg-header">
+				<div class="container-fluid">
+					<div class="logo">线上博物馆</div>
+				</div>
+			</nav>
+			<!-- .Header  -->
+			<!-- Content  -->
+        <div id="content">
+            <div class="content-wrap page-news">
+
+                <div class="subsite">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="share-button">
+                                <ul class="post-share">
+                                    <li class="text">我的预约：</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">标题</th>
+                                <th scope="col">预约类型</th>
+                                <th scope="col">预约情况</th>
+                                <th scope="col">日期</th>
+                                <th scope="col">时间</th>
+                                <th scope="col">场次</th>
+                                <th scope="col">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in reserve" >
+                                <th scope="row" @click="showPop(item)">{{item.cateTitle}}</th>
+                                <td>{{item.resType}}</td>
+                                <td :class="item.vldStat == '1' ? 'valid' : 'invalid'">{{item.vldStat == '1' ? '有效' : '无效'}}</td>
+                                <td>{{item.resDate}}</td>
+                                <td>{{item.resTime}}</td>
+                                <td>{{item.resSession}}</td>
+                                <td>
+<!--                                    <button v-if="item.vldStat == '1'" class="theme-button" @click="editDetail(item, '0')">取消</button>-->
+                                    <button v-if="item.vldStat == '1'" class="theme-button"  @click="reschedule(item),editDetail(item, '0')">取消并重新预约</button>
+                                </td>
+                                <td><button class="theme-button" @click="delDetail(item.id)">删除</button></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row" style="max-height: 80vh;overflow-y: auto">
+                        <div v-if="showReservePop" class="popup">
+                            <dv>
+                                <button @click="showReservePop = false">关闭</button>
+                            </dv>
+                            <p v-html="popHtml"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="line-separate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+			<!-- .Content  -->
+			<!-- 底部面板  -->
+			<div class="bottom-panel">
+				<div class="bp-col">
+					<a href="index.html">
+						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+						<div class="bp-text">首页</div>
+					</a>
+				</div>
+                <div class="bp-col">
+                    <a href="col-list.html">
+                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+                        <div class="bp-text">藏品</div>
+                    </a>
+                </div>
+				<div class="bp-col">
+					<a href="myReserveDetail.html">
+						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+						<div class="bp-text">我的预约</div>
+					</a>
+				</div>
+				<div class="bp-col">
+					<a href="setting.html">
+						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+						<div class="bp-text">个人中心</div>
+					</a>
+				</div>
+			</div>
+			<!-- .Bottom Panel  -->
+			<div class="overlay"></div>
+			<!-- Optional JavaScript -->
+			<!-- jQuery v3.4.1 -->
+			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+			<!--  Bootstrap v4.3.1 JS -->
+			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+			<!-- Magnific Popup core JS file -->
+			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+			<!-- Slick JS -->
+			<script src="lib/slick/slick/slick.min.js"></script>
+			<!--  Custom JS -->
+			<script src="js/theme.js"></script>
+        <script>
+            const vm = new Vue({
+                el: '#content',
+                data: {
+                    colTyps : [],
+                    feedBacks : [],
+                    collectionData : {},
+                    reserve : [],
+                    queryInfo: {
+                        name: '',
+                        pagenum: 1,
+                        pagesize: 800
+                    },
+                    picBaseUrl: '',
+                    id: '',
+                    feedContext: '',
+                    showReservePop: false,
+                    popHtml: ''
+                },
+                mounted() {
+                    this.listMsReserve()
+                },
+                methods: {
+                    listMsReserve() {
+                        const userStr = sessionStorage.getItem('user')
+                        if(userStr === null || userStr === '') {
+                            window.location.href='login.html'
+                            return
+                        }
+                        const user = JSON.parse(userStr)
+                        this.queryInfo.userId = user.id
+                        post('/reserveDetail/listDetailReserve', this.queryInfo).then(response => {
+                            this.reserve = response.data.list;
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    showPop(item) {
+                        console.log(item)
+                        this.showReservePop = true
+                        this.popHtml = item.res_desc
+                    },
+                    editDetail(item, vld) {
+                        item.vldStat = vld
+                        post('/reserveDetail/editDetail', item).then(response => {
+                            if(response.code === 200) {
+                                alert('成功')
+                            } else {
+                                alert(response.msg)
+                            }
+                            this.listMsReserve()
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    delDetail(id) {
+                        post('/reserveDetail/delDetail', {id: id}).then(response => {
+                            this.listMsReserve()
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    reschedule(item) {
+                        this.editDetail(item, '1');
+                        window.location.href = 'index.html';
+                    }
+                }
+            })
+        </script>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<!-- Required meta tags -->
+        <meta charset="UTF-8">
+        <title>线上博物馆</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-touch-fullscreen" content="yes">
+		<meta name="HandheldFriendly" content="True">
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
+		<!-- Bootstrap v4.3.1 CSS -->
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/theme.css">
+		<!-- Slick CSS -->
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
+		<!-- Magnific Popup core CSS file -->
+		<link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
+		<!-- Font Awesome Free 5.10.2 CSS JS -->
+		<link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+        <link href="lib/elementui/emui_index.css" rel="stylesheet" type="text/css" />
+        <script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
+        <script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
+        <script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
+        <script defer src="lib/elementui/emui_index.js"></script>
+        <script src="./util/vue.js"></script>
+        <script src="./util/axios.js"></script>
+        <script src="./util/request.js"></script>
+	</head>
+<body class="default">
+		<div class="preloading">
+			<div class="wrap-preload">
+				<div class="cssload-loader"></div>
+			</div>
+		</div>
+			<!-- Header  -->
+			<nav class="navbar navbar-expand-lg navbar-light bg-header">
+				<div class="container-fluid">
+					<div class="logo">线上博物馆</div>
+				</div>
+			</nav>
+			<!-- .Header  -->
+			<!-- Content  -->
+        <div id="content">
+            <div class="content-wrap page-news-list">
+                <div class="subsite-banner">
+                    <img src="img/subsite-banner-5.jpg">
+                </div>
+                <div class="subsite subsite-with-banner">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="subsite-heading">
+                                藏品列表
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="search-form search-content">
+                                <select class="custom-select mr-sm-2 with-icon" id="caravailable" v-model="queryInfo.cateId">
+                                    <option :value="item.dicValue" v-for="item in colTyps">{{item.dicValue}}</option>
+                                </select>
+                                <div class="search-wrapper ">
+                                    <input id="search" placeholder="请输入标题" v-model="queryInfo.name">
+                                    <button class="ssubmit" type="button" name="search_submit" @click="getColData()"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row news-row" v-for="item in collectionData">
+                        <div class="col-md-12">
+                            <a :href="'collDetail.html?id='+ item.id">
+                                <div class="news-card">
+                                    <div class="nc-top">
+                                        <div class="nc-left">
+                                            <div class="ncl-image">
+                                                <img :src="'http://124.222.106.130:7081/C7164_museum/file/getPic?name=' + item.colPic" alt="image">
+                                            </div>
+                                        </div>
+                                        <div class="nc-right">
+                                            <div class="ncr-row-a">
+                                                {{item.title}}
+                                            </div>
+                                            <div class="ncr-row-b">
+                                                <p v-html="item.desColl"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+			<!-- .Content  -->
+			<!-- 底部面板  -->
+			<div class="bottom-panel">
+				<div class="bp-col">
+					<a href="index.html">
+						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+						<div class="bp-text">首页</div>
+					</a>
+				</div>
+                <div class="bp-col">
+                    <a href="col-list.html">
+                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+                        <div class="bp-text">藏品</div>
+                    </a>
+                </div>
+				<div class="bp-col">
+					<a href="myReserveDetail.html">
+						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+						<div class="bp-text">我的预约</div>
+					</a>
+				</div>
+				<div class="bp-col">
+					<a href="setting.html">
+						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+						<div class="bp-text">个人中心</div>
+					</a>
+				</div>
+			</div>
+			<!-- .Bottom Panel  -->
+			<div class="overlay"></div>
+			<!-- Optional JavaScript -->
+			<!-- jQuery v3.4.1 -->
+			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+			<!--  Bootstrap v4.3.1 JS -->
+			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+			<!-- Magnific Popup core JS file -->
+			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+			<!-- Slick JS -->
+			<script src="lib/slick/slick/slick.min.js"></script>
+			<!--  Custom JS -->
+			<script src="js/theme.js"></script>
+        <script>
+            const vm = new Vue({
+                el: '#content',
+                data: {
+                    colTyps : [],
+                    collectionData : [],
+                    queryInfo: {
+                        name: '',
+                        pagenum: 1,
+                        pagesize: 8,
+                        cateId: ''
+                    }
+                },
+                mounted() {
+                    const typ = getQueryString('type')
+                    this.queryInfo.cateId = typ
+                    this.getData()
+                    this.getColData()
+                    this.listDicByTyp()
+                },
+                methods: {
+                    getData() {
+                        post('dic/listDicByTyp', {dicTyp: '预约类型'}).then(response => {
+                            this.colTyps = response.data;
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                    getColData() {
+                        post('/collect/getdata', this.queryInfo).then(response => {
+                            this.collectionData = response.data.list;
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+                }
+            })
+        </script>
+</body>
+</html>
