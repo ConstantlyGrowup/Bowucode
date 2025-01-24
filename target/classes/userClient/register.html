@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+		<title>线上博物馆</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-touch-fullscreen" content="yes">
+		<meta name="HandheldFriendly" content="True">
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
+		<!-- Bootstrap v4.3.1 CSS -->
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/theme.css">
+		<!-- Slick CSS -->
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
+		<!-- Magnific Popup core CSS file -->
+		<link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
+		<!-- Font Awesome Free 5.10.2 CSS JS -->
+		<link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
+        <script src="./util/vue.js"></script>
+        <script src="./util/axios.js"></script>
+        <script src="./util/request.js"></script>
+	</head>
+<body class="default">
+		<div class="preloading">
+			<div class="wrap-preload">
+				<div class="cssload-loader"></div>
+			</div>
+		</div>
+			<!-- Header  -->
+			<nav class="navbar navbar-expand-lg navbar-light bg-header">
+				<div class="container-fluid">
+					<div class="logo">线上博物馆</div>
+				</div>
+			</nav>
+			<!-- .Header  -->
+			<!-- Content  -->
+        <div id="content">
+            <div class="content-wrap page-register">
+                <div class="subsite subsite-with-banner">
+                    <div class="row" style="margin-top: 50px">
+                        <div class="col-md-12">
+                            <div class="subsite-heading">
+                                用户注册
+                            </div>
+                        </div>
+                    </div>
+                    <form class="form-group">
+                        <div class="row field-row">
+                            <div class="col no-padding-right">
+                                <label>登录名</label>
+                                <div class="field-group">
+                                    <i class="fas fa-user"></i>
+                                    <input type="text" class="form-control with-icon" v-model="userInfo.username">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row">
+                            <div class="col">
+                                <label>昵称</label>
+                                <div class="field-group">
+                                    <i class="fas fa-user-circle"></i>
+                                    <input type="text" class="form-control with-icon" v-model="userInfo.nickname">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row">
+                            <div class="col">
+                                <label>手机号</label>
+                                <div class="field-group">
+                                    <i class="fas fa-phone-square"></i>
+                                    <input type="text" class="form-control with-icon" v-model="userInfo.mobile">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row">
+                            <div class="col">
+<!--                                <label>用户地址</label>-->
+                                <label>身份证号码</label>
+                                <div class="field-group">
+                                    <i class="fas fa-home"></i>
+                                    <input type="text" class="form-control with-icon" v-model="userInfo.idCard">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row">
+                            <div class="col">
+                                <label>密码</label>
+                                <div class="field-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" class="form-control with-icon" v-model="userInfo.password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row">
+                            <div class="col">
+                                <label>确认密码</label>
+                                <div class="field-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" class="form-control with-icon" v-model="userInfo.rPassword">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row field-row have-a-account">
+                            <div class="col">
+                                <div class="field-group">
+                                    已有账号? <a href="login.html"> 登录 </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row register-submit">
+                            <div class="col">
+                                <div class="button">
+                                    <button type="button" class="theme-button" @click="addUser()">创建</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+			<!-- .Content  -->
+			<!-- 底部面板  -->
+			<div class="bottom-panel">
+				<div class="bp-col">
+					<a href="index.html">
+						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+						<div class="bp-text">首页</div>
+					</a>
+				</div>
+                <div class="bp-col">
+                    <a href="col-list.html">
+                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+                        <div class="bp-text">藏品</div>
+                    </a>
+                </div>
+				<div class="bp-col">
+					<a href="myReserveDetail.html">
+						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+						<div class="bp-text">我的预约</div>
+					</a>
+				</div>
+				<div class="bp-col">
+					<a href="setting.html">
+						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+						<div class="bp-text">个人中心</div>
+					</a>
+				</div>
+			</div>
+			<!-- .Bottom Panel  -->
+			<div class="overlay"></div>
+			<!-- Optional JavaScript -->
+			<!-- jQuery v3.4.1 -->
+			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+			<!--  Bootstrap v4.3.1 JS -->
+			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+			<!-- Magnific Popup core JS file -->
+			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+			<!-- Slick JS -->
+			<script src="lib/slick/slick/slick.min.js"></script>
+			<!--  Custom JS -->
+			<script src="js/theme.js"></script>
+        <script>
+            const vm = new Vue({
+                el: '#content',
+                data: {
+                    userInfo : {
+                        username: '',
+                        password: '',
+                        rPassword: '',
+                        address: '',
+                        mobile: '',
+                        nickname: '',
+                        idCard: '',
+                        state: 1
+                    },
+                    collectionData : [],
+                    queryInfo: {
+                        name: '',
+                        pagenum: 1,
+                        pagesize: 8
+                    },
+                    feedContext: ''
+                },
+                mounted() {
+                },
+                methods: {
+                    addUser() {
+                        if(this.userInfo.username === '') {
+                            alert('请输入登录名！')
+                            return
+                        }
+                        if(this.userInfo.nickname === ''){
+                            alert('请输入昵称！')
+                            return
+                        }
+                        if(this.userInfo.mobile === '') {
+                            alert('请输入手机号！')
+                            return
+                        }
+                        if(this.userInfo.password === '') {
+                            alert('请输入密码！')
+                            return
+                        }
+                        if(this.userInfo.password !== this.userInfo.rPassword) {
+                            alert('确认密码与原密码不一致！')
+                            return
+                        }
+
+                        // 先校验手机号
+                        if (!this.validateMobile(this.userInfo.mobile)) {
+                            alert('手机号格式不正确！');
+                            return;
+                        }
+
+                        // 再校验身份证号
+                        if (!this.validateIdCard(this.userInfo.idCard)) {
+                            alert('身份证号码格式不正确！');
+                            return;
+                        }
+
+                        // 如果所有校验都通过，则提交数据
+                        post('user/register', this.userInfo).then(response => {
+                            if(response.code !== 200) {
+                                alert(response.msg)
+                            } else {
+                                alert('注册成功！');
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    },
+
+                    // 手机号校验函数
+                    validateMobile(mobile) {
+                        const mobileRegex = /^1[3-9]\d{9}$/;
+                        return mobileRegex.test(mobile);
+                    },
+
+                    // 身份证号校验函数
+                    validateIdCard(idCard) {
+                        const idCardRegex = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+                        return idCardRegex.test(idCard);
+                    }
+                }
+            })
+        </script>
+</body>
+</html>
