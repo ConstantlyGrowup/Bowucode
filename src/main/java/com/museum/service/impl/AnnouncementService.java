@@ -52,6 +52,7 @@ public class AnnouncementService extends ServiceImpl<MsAnnouncementMapper, MsAnn
      */
     public void addMsAnnouncement(MsAnnouncement msAnnouncement) throws Exception {
         msAnnouncement.setDate(StringUtils.getNowDateTIme()); // 更新的时候插入当前时间
+        if(msAnnouncement.getIsTop()==null||msAnnouncement.getIsTop().isEmpty())msAnnouncement.setIsTop("0");
         save(msAnnouncement);
     }
     /**
