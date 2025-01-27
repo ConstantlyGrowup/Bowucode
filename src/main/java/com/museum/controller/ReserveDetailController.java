@@ -3,8 +3,8 @@ package com.museum.controller;
 
 import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
-import com.museum.damain.dto.ReserveQuery;
-import com.museum.damain.po.MsReserveDetial;
+import com.museum.domain.dto.ReserveQuery;
+import com.museum.domain.po.MsReserveDetial;
 import com.museum.service.impl.ReserveDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

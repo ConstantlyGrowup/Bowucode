@@ -2,8 +2,8 @@ package com.museum.controller;
 
 
 import com.museum.config.JsonResult;
-import com.museum.damain.po.MsDic;
-import com.museum.damain.query.PageQuery;
+import com.museum.domain.po.MsDic;
+import com.museum.domain.query.PageQuery;
 import com.museum.service.impl.DicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

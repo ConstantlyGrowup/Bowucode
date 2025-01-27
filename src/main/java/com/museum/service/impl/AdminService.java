@@ -2,7 +2,7 @@ package com.museum.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.museum.damain.po.Admin;
+import com.museum.domain.po.Admin;
 import com.museum.mapper.AdminMapper;
 import org.springframework.stereotype.Service;
 

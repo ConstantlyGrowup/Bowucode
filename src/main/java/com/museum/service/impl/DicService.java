@@ -3,7 +3,7 @@ package com.museum.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.museum.damain.po.MsDic;
+import com.museum.domain.po.MsDic;
 import com.museum.mapper.DicMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

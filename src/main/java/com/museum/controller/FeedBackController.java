@@ -3,8 +3,8 @@ package com.museum.controller;
 
 import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
-import com.museum.damain.dto.FeedBackQuery;
-import com.museum.damain.po.FeedBack;
+import com.museum.domain.dto.FeedBackQuery;
+import com.museum.domain.po.FeedBack;
 import com.museum.service.impl.FeedBackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

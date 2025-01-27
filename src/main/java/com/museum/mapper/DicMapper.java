@@ -1,7 +1,7 @@
 package com.museum.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.museum.damain.po.MsDic;
+import com.museum.domain.po.MsDic;
 
 /**
  * <p>

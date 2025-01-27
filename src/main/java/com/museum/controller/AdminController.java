@@ -2,7 +2,7 @@ package com.museum.controller;
 
 
 import com.museum.config.JsonResult;
-import com.museum.damain.po.Admin;
+import com.museum.domain.po.Admin;
 import com.museum.service.impl.AdminService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

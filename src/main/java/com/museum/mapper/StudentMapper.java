@@ -1,6 +1,6 @@
 package com.museum.mapper;
 
-import com.museum.damain.po.Student;
+import com.museum.domain.po.Student;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

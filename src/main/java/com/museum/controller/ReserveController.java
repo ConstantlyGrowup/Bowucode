@@ -3,10 +3,8 @@ package com.museum.controller;
 
 import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
-import com.museum.damain.dto.ReserveQuery;
-import com.museum.damain.po.MsCollection;
-import com.museum.damain.po.MsReserve;
-import com.museum.damain.query.PageQuery;
+import com.museum.domain.dto.ReserveQuery;
+import com.museum.domain.po.MsReserve;
 import com.museum.service.impl.CollectionService;
 import com.museum.service.impl.ReserveService;
 import lombok.RequiredArgsConstructor;

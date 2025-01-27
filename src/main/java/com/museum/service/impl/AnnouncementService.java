@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.museum.config.ExcepUtil;
 import com.museum.config.PageResult;
-import com.museum.damain.po.MsAnnouncement;
-import com.museum.damain.query.PageQuery;
+import com.museum.domain.po.MsAnnouncement;
+import com.museum.domain.query.PageQuery;
 import com.museum.mapper.MsAnnouncementMapper;
 import com.museum.utils.StringUtils;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  *  服务实现类（公告管理）
  * </p>
  *
- * @since 2023-12-19
+ * 
  */
 @Service
 public class AnnouncementService extends ServiceImpl<MsAnnouncementMapper, MsAnnouncement> implements IService<MsAnnouncement> {
@@ -27,7 +27,10 @@ public class AnnouncementService extends ServiceImpl<MsAnnouncementMapper, MsAnn
      */
     public PageResult<MsAnnouncement> listMsAnnouncement(PageQuery pageQuery) {
         Page<MsAnnouncement> pageResult = lambdaQuery().
-                like(MsAnnouncement::getTitle, pageQuery.getName()).page(pageQuery.toMpPage());
+                like(MsAnnouncement::getTitle, pageQuery.getName())
+                .orderByDesc(MsAnnouncement::getIsTop)
+                .orderByDesc(MsAnnouncement::getDate)
+                .page(pageQuery.toMpPage());
         return PageResult.of(pageResult, pageResult.getRecords());
     }
 
@@ -38,7 +41,8 @@ public class AnnouncementService extends ServiceImpl<MsAnnouncementMapper, MsAnn
     public PageResult<MsAnnouncement> listMsAnnouncementTop(PageQuery pageQuery) {
         Page<MsAnnouncement> pageResult = lambdaQuery().
                 like(MsAnnouncement::getTitle, pageQuery.getName()).eq(MsAnnouncement::getIsTop,"1")
-                .orderByDesc(MsAnnouncement::getDate).page(pageQuery.toMpPage());
+                .orderByDesc(MsAnnouncement::getDate)
+                .page(pageQuery.toMpPage());
         return PageResult.of(pageResult, pageResult.getRecords());
     }
 
