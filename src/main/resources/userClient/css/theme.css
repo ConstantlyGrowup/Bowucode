@@ -53,7 +53,7 @@
 ----------------------------------------------------- */
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 楷体, KaiTi;
   background: #ffffff;
   font-size: 13px;
   color: #393939; }
@@ -63,7 +63,7 @@ input,
 optgroup,
 select,
 textarea {
-  font-family: 'Poppins', sans-serif; }
+  font-family: 'DFKai-SB', sans-serif; }
 
 .custom-select,
 .form-control {
@@ -123,7 +123,7 @@ img {
   text-align: center; }
 
 .theme-button {
-  background-color: #5A1A11;
+  background-color: #521D0F;
   padding: 5px 15px;
   color: #fff;
   cursor: pointer;
@@ -333,7 +333,7 @@ body .form-control:focus {
     max-width: 99999px; } }
 .subsite-heading {
   text-align: center;
-  color: #A69447;
+  color: #CD9349;
   font-size: 18px;
   width: 100%;
   font-weight: 600;
@@ -566,7 +566,7 @@ form .input-group > .form-control:not(:last-child) {
   left: 0px;
   height: 56px;
   width: 100%;
-  background-color: #761E1E;
+  background-color: #521D0F;
   border-bottom: 0px solid #ddd; }
 
 .navbar {
@@ -886,7 +886,7 @@ a[data-toggle="collapse"] {
 ----------------------------------------------------- */
 .bottom-panel {
   height: 70px;
-  background-color: #761E1E;
+  background-color: #521D0F;
   width: 100%;
   border-top: 0px solid #ddd;
   position: fixed;
@@ -914,6 +914,11 @@ a[data-toggle="collapse"] {
   .bottom-panel .bp-col:last-child {
     border-right: 0px solid #ddd; }
 
+  .selected-bottom-text {
+    font-weight: bold;
+    color: #FFB968;
+    font-size: 1.1em; /* 这里1.2em表示相对于父元素字体大小的1.2倍，可根据需要调整，如1.5em */
+  }
 /* ---------------------------------------------------
 6. HOMEPAGE
 ----------------------------------------------------- */
