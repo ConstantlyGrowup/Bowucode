@@ -49,10 +49,10 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
      */
     public PageResult<MsCollection> listMsCollectionTop(PageQuery pageQuery) {
         // 热门展品
-        if("热门展览".equals(pageQuery.getMenuName())) {
+        if("热门藏品".equals(pageQuery.getMenuName())) {
             Page<MsCollection> page = lambdaQuery().orderByDesc(MsCollection::getViewCnt).page(pageQuery.toMpPage());
             return PageResult.of(page, page.getRecords());
-        } else if("近期展览".equals(pageQuery.getMenuName())) {
+        } else if("藏品一览".equals(pageQuery.getMenuName())) {
             Page<MsCollection> page = lambdaQuery().orderByDesc(MsCollection::getCrtTm).page(pageQuery.toMpPage());
             return PageResult.of(page, page.getRecords());
         }

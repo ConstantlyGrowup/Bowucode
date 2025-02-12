@@ -136,6 +136,10 @@
                                     {{currentAnnouncement.title}}
                                 </div>
                                 <p v-html="currentAnnouncement.contentText"></p>
+                                <!-- 添加公告时间 -->
+                                <div class="announcement-date">
+                                    发布时间：{{currentAnnouncement.date}}
+                                </div>
                             </div>
                         </div>
 
@@ -273,8 +277,8 @@
                 el: '#app',
                 data: {
                     menuData: [
-                        { id: 1, name: '近期展览' },
-                        { id: 2, name: '热门展览' },
+                        { id: 1, name: '藏品一览' },
+                        { id: 2, name: '热门藏品' },
                          { id: 3, name: '近期公告' },
                         // { id: 4, name: '热门解说' }
                     ],
@@ -286,8 +290,8 @@
                     queryInfo: {
                         name: '',
                         pagenum: 1,
-                        pagesize: 4,  // 每页显示5条公告
-                        menuName: '近期展览'
+                        pagesize: 5,  // 每页显示6条公告
+                        menuName: '藏品一览'
                     },
                     feedContext: '',
                     userInf: {},

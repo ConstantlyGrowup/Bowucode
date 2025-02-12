@@ -2432,3 +2432,109 @@ body.preview {
     font-weight: bold;
     color: #452F2E;
 }
+
+/* 藏品短描述样式 */
+.short-description {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    color: rgba(19,19,19,0.49);
+    font-weight: bold;
+}
+
+
+/* 响应式表格样式 */
+.table-responsive {
+    width: 100%;
+    margin-bottom: 15px;
+    overflow-y: hidden;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+/* 在移动端优化表格显示 */
+@media screen and (max-width: 768px) {
+    .table {
+        font-size: 10px;  /* 减小字体大小 */
+    }
+    
+    /* 允许表格水平滚动 */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 调整单元格内边距 */
+    .table td, 
+    .table th {
+        padding: 4px 2px;
+        white-space: nowrap;  /* 防止文字换行 */
+    }
+
+    /* 调整按钮大小 */
+    .table .theme-button {
+        padding: 3px 8px;
+        font-size: 12px;
+    }
+}
+
+/* 藏品详细描述样式 */
+.collection-description {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    margin-top: 10px;
+    text-align: justify;
+}
+
+/* 在移动端优化藏品描述显示 */
+@media screen and (max-width: 768px) {
+    .collection-description {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #333;
+      margin-top: 10px;
+      text-align: justify;
+}
+}
+/* 数据可视化容器和图表样式 */
+.visualization-container {
+    margin-top: 10px;  /* 与表格的间距 */
+    padding: 10px 0;   /* 内部间距 */
+}
+
+.analysis-chart {
+    width: 95%;
+    height: 180px;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 768px) {
+    .visualization-container {
+        margin-top: 5px;
+    }
+    
+    .analysis-chart {
+        width: 95%;
+        height: 140px;
+        max-width: 350px;
+    }
+}
+
+/* 公告时间样式 */
+.announcement-date {
+    text-align: right;
+    color: #666;
+    font-size: 13px;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+@media screen and (max-width: 768px) {
+    .announcement-date {
+        font-size: 12px;
+        margin-top: 15px;
+    }
+}
+

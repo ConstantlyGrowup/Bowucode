@@ -55,15 +55,17 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
      * @return
      */
     public PageResult<MsReserve> listMsReserveClient(ReserveQuery pageQuery) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now();//今日的日期
+        LocalDate nextMonth = LocalDate.now().plusMonths(1);//下个月的日期
         String todayString = today.format(DateTimeFormatter.ISO_LOCAL_DATE);
-
+        String nextMonthString = nextMonth.format(DateTimeFormatter.ISO_LOCAL_DATE);
         QueryWrapper<MsReserve> queryWrapper = new QueryWrapper<>();
 
-        // 添加过滤条件，过滤掉已经过时的预约信息
+        // 添加过滤条件，过滤掉已经过时的预约信息，并且只显示近一个月内的预约信息
         queryWrapper.lambda()
                 .eq(pageQuery.getCateId() != null, MsReserve::getCateId, pageQuery.getCateId())
-                .ge(MsReserve::getResDate, todayString);
+                .ge(MsReserve::getResDate, todayString)
+                .le(MsReserve::getResDate,nextMonthString);
 
         Page<MsReserve> page = this.page(pageQuery.toMpPage(), queryWrapper);
         return PageResult.of(page, page.getRecords());

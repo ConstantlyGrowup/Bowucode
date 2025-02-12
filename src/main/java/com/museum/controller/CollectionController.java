@@ -43,20 +43,17 @@ public class CollectionController {
     public JsonResult getdataTop(@RequestBody PageQuery pageQuery) {
         String menuNm = pageQuery.getMenuName();
         if(menuNm == null) {
-            pageQuery.setMenuName("热门展览");
-            menuNm = "热门展览";
+            pageQuery.setMenuName("热门藏品");
+            menuNm = "热门藏品";
         }
         PageResult pageResult = null;
-        switch (menuNm){
-            case "热门展览":
-            case "近期展览":
-                pageResult = collectionService.listMsCollectionTop(pageQuery);
-                break;
-            case "近期解说":
-            case "热门解说":
-                pageResult = reserveService.listTop(pageQuery);
-                break;
-        }
+//        switch (menuNm){
+//            case "热门藏品":
+//            case "藏品一览":
+//                pageResult = collectionService.listMsCollectionTop(pageQuery);
+//                break;
+//        }
+        pageResult = collectionService.listMsCollectionTop(pageQuery);
         return JsonResult.result(pageResult);
     }
 

@@ -32,7 +32,7 @@ import java.util.Random;
 @RequestMapping("/file")
 @RequiredArgsConstructor
 public class FileController {
-    private final static String FILE_UPLOAD_PATH = "D:\\upload\\";
+    private final static String FILE_UPLOAD_PATH = "C:\\Users\\lly\\Pictures\\DigitalPlatformUsed";
     @PostMapping("/uploadFile")
     public JsonResult getdata(@RequestParam("file") MultipartFile[] file) {
         if(file == null || file.length<1) {

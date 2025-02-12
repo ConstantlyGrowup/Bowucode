@@ -72,18 +72,20 @@
                     </div>
                     <br>
                     <div class="row">
-<!--                        <div class="col-md-12">-->
-<!--                            <div class="share-button">-->
-<!--                                <ul class="post-share">-->
-<!--                                    <li class="text">当前可预约：{{item.resSum - }}</li>-->
-<!--                                </ul>-->
-<!--                            </div>-->
-<!--                        </div>-->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <p v-html="collectionData.desColl"></p>
-                            </div>
+                        <div class="col-md-6">
+                            <img :src="'http://localhost:8090/api/file/getPic?name=' + collectionData.colPic" 
+                                 alt="藏品图片" 
+                                 class="img-fluid" 
+                                 style="max-width: 100%; border-radius: 8px; margin-bottom: 20px;">
                         </div>
+                        <div class="col-md-6">
+                            <div class="short-description">
+                                {{collectionData.base}}
+                            </div>
+                            <div class="collection-description" v-html="collectionData.desColl"></div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
                         <table class="table">
                             <thead>
                             <tr>
@@ -98,7 +100,7 @@
                             </thead>
                             <tbody>
                             <tr v-for="item in reserve" @mouseover="getRowInfo(item)">
-                                <th scope="row" @click="showPop(item)">{{item.title}}</th>
+                                <th scope="row" >{{item.title}}</th>
                                 <td>{{item.resTyp}}</td>
                                 <td>{{item.resdSum==null?0:item.resdSum}}/{{item.resSum}}</td>
                                 <td>{{item.resDate}}</td>
@@ -108,63 +110,58 @@
                             </tr>
                             </tbody>
                         </table>
-                    </div>
-                    <div class="row" style="max-height: 80vh;overflow-y: auto">
-                        <div v-if="showReservePop" class="popup">
-                            <dv>
-                                <button @click="showReservePop = false">关闭</button>
-                            </dv>
-                            <p v-html="popHtml"></p>
+                        <div class="visualization-container">
+                            <div id="analysePie" class="analysis-chart"></div>
                         </div>
                     </div>
-                    <div id="analysePie" style="width: 80%;height: 200px;margin: 0 auto"></div>
-<!--                    <div class="row">-->
-<!--                        <div class="col-md-12">-->
-<!--                            <img :src="picBaseUrl + collectionData.colPic" alt="image" class="border-radius">-->
-<!--                        </div>-->
-<!--                    </div>-->
-                    <br>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="line-separate"></div>
-                        </div>
+                </div>
+                <div class="row" style="max-height: 80vh;overflow-y: auto">
+                    <div v-if="showReservePop" class="popup">
+                        <dv>
+                            <button @click="showReservePop = false">关闭</button>
+                        </dv>
+                        <p v-html="popHtml"></p>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="tab-comment">
-                                <div class="col-md-12">
-                                    <div class="share-button">
-                                        <ul class="post-share">
-                                            <li class="text">用户评论：</li>
-                                        </ul>
-                                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="line-separate"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="tab-comment">
+                            <div class="col-md-12">
+                                <div class="share-button">
+                                    <ul class="post-share">
+                                        <li class="text">用户评论：</li>
+                                    </ul>
                                 </div>
-                                <div class="comment-list">
-                                    <div class="section-comment" style="padding-left: 0px" v-for="item in feedBacks">
-                                        <div class="comment-view-body">
-                                            <div class="cm-row">
-                                                <div class="cmc-heading">
-                                                    <a class="float-left cm-name" href="javascript:void(0)"><strong>{{item.userName}}</strong></a>
-                                                    <p class="float-right cm-hour">{{item.fedDateTime}}</p>
-                                                    <div class="clear"></div>
-                                                </div>
-                                                <div class="cm-content">
-                                                    {{item.feedContent}}
-                                                </div>
+                            </div>
+                            <div class="comment-list">
+                                <div class="section-comment" style="padding-left: 0px" v-for="item in feedBacks">
+                                    <div class="comment-view-body">
+                                        <div class="cm-row">
+                                            <div class="cmc-heading">
+                                                <a class="float-left cm-name" href="javascript:void(0)"><strong>{{item.userName}}</strong></a>
+                                                <p class="float-right cm-hour">{{item.fedDateTime}}</p>
+                                                <div class="clear"></div>
+                                            </div>
+                                            <div class="cm-content">
+                                                {{item.feedContent}}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="add-new-comment">
-                                    <input v-model="feedContext" class="input your-msg" placeholder="善语结善缘，恶语伤人心...">
-                                    <div class="button">
-                                        <button type="submit" class="theme-button" @click="sendFeedBack()">评论</button>
-                                    </div>
+                            </div>
+                            <div class="add-new-comment">
+                                <input v-model="feedContext" class="input your-msg" placeholder="善语结善缘，恶语伤人心...">
+                                <div class="button">
+                                    <button type="submit" class="theme-button" @click="sendFeedBack()">评论</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
             </div>
@@ -277,22 +274,43 @@
                     initCharts(data) {
                         const chartDom = document.getElementById('analysePie');
                         const myChart = echarts.init(chartDom);
-                        let option;
+                        
+                        // 添加窗口大小改变时的处理
+                        window.addEventListener('resize', function() {
+                            myChart.resize();
+                        });
 
+                        let option;
                         option = {
                             tooltip: {
                                 trigger: 'item'
                             },
                             legend: {
                                 orient: 'vertical',
-                                left: 'left'
+                                left: '5%',
+                                top: 'center'
                             },
                             yAxis: {
                                 type: 'category',
-                                data: ['可预约', '已预约']
+                                data: ['可预约', '已预约'],
+                                axisLabel: {
+                                    margin: 5,
+                                    fontSize: window.innerWidth < 768 ? 10 : 12  // 移动端字体更小
+                                }
                             },
                             xAxis: {
-                                type: 'value'
+                                type: 'value',
+                                axisLabel: {
+                                    margin: 5,
+                                    fontSize: window.innerWidth < 768 ? 10 : 12  // 移动端字体更小
+                                }
+                            },
+                            grid: {
+                                containLabel: true,
+                                left: window.innerWidth < 768 ? '20%' : '15%',  // 移动端调整边距
+                                right: '10%',
+                                top: '10%',
+                                bottom: '10%'
                             },
                             series: [
                                 {
@@ -310,12 +328,13 @@
                                     },
                                     label: {
                                         show: true,
-                                        position: 'right'
+                                        position: 'right',
+                                        fontSize: window.innerWidth < 768 ? 10 : 12  // 移动端字体更小
                                     }
                                 }
                             ]
                         };
-                        option && myChart.setOption(option);
+                        myChart.setOption(option);
                     },
                     listFeedBackByUser() {
                         post('/feedBack/listFeedBackByUser', {cateId: this.queryInfo.id}).then(response => {
