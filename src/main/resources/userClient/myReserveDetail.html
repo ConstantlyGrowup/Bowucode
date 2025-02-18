@@ -88,15 +88,14 @@
                             </thead>
                             <tbody>
                             <tr v-for="item in reserve" >
-                                <th scope="row" @click="showPop(item)">{{item.cateTitle}}</th>
+                                <th scope="row" @click="showPop(item)">{{item.title}}</th>
                                 <td>{{item.resType}}</td>
                                 <td :class="item.vldStat == '1' ? 'valid' : 'invalid'">{{item.vldStat == '1' ? '有效' : '无效'}}</td>
                                 <td>{{item.resDate}}</td>
                                 <td>{{item.resTime}}</td>
                                 <td>{{item.resSession}}</td>
                                 <td>
-<!--                                    <button v-if="item.vldStat == '1'" class="theme-button" @click="editDetail(item, '0')">取消</button>-->
-                                    <button v-if="item.vldStat == '1'" class="theme-button"  @click="reschedule(item),editDetail(item, '0')">取消并重新预约</button>
+                                    <button v-if="item.vldStat == '1'" class="theme-button" @click="reschedule(item),editDetail(item, '0')">取消并重新预约</button>
                                 </td>
                                 <td><button class="theme-button" @click="delDetail(item.id)">删除</button></td>
                             </tr>

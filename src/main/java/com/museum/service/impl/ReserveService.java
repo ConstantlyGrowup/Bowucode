@@ -10,9 +10,11 @@ import com.museum.config.PageResult;
 import com.museum.domain.dto.ReserveQuery;
 import com.museum.domain.po.MsCollection;
 import com.museum.domain.po.MsReserve;
-import com.museum.domain.po.MsReserveDetial;
+import com.museum.domain.po.MsReserveCollection;
+import com.museum.domain.po.MsReserveDetail;
 import com.museum.domain.query.PageQuery;
 import com.museum.mapper.CollectionMapper;
+import com.museum.mapper.ReserveCollectionMapper;
 import com.museum.mapper.ReserveDetialMapper;
 import com.museum.mapper.ReserveMapper;
 import com.museum.utils.StringUtils;
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -36,17 +39,39 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
     private ReserveDetialMapper reserveDetialMapper;
     @Resource
     CollectionMapper collectionMapper;
+    @Resource
+    private ReserveCollectionMapper reserveCollectionMapper;
     /**
-     * 获取展品列表
-     * @return
+     * 获取展览列表（后台管理使用）
+     * @param pageQuery 分页查询参数
+     * @return 分页结果
      */
     public PageResult<MsReserve> listMsReserve(ReserveQuery pageQuery) {
-        LambdaQueryChainWrapper<MsReserve> lambdaQueryChainWrapper = lambdaQuery().like(MsReserve::getTitle, pageQuery.getName());
-        if(null != pageQuery.getCateId()) {
-            lambdaQueryChainWrapper.eq(MsReserve::getCateId, pageQuery.getCateId());
+        // 构建查询条件
+        LambdaQueryChainWrapper<MsReserve> queryChain = lambdaQuery();
+        
+        // 如果有名称搜索条件，添加模糊查询
+        if (StringUtils.isNotBlank(pageQuery.getName())) {
+            queryChain.like(MsReserve::getTitle, pageQuery.getName());
         }
-        Page<MsReserve> page = lambdaQueryChainWrapper.like(MsReserve::getTitle, pageQuery.getName()).page(pageQuery.toMpPage());
-        return PageResult.of(page, page.getRecords());
+        
+        // 执行分页查询
+        Page<MsReserve> page = queryChain.page(pageQuery.toMpPage());
+        List<MsReserve> records = page.getRecords();
+        
+        // 查询每个展览关联的藏品信息
+        for (MsReserve reserve : records) {
+            // 获取展览关联的藏品ID列表
+            List<Integer> cateIds = reserveCollectionMapper.findCateIdsByReserveId(reserve.getId());
+            if (!cateIds.isEmpty()) {
+                // 查询藏品详细信息
+                List<MsCollection> collections = collectionMapper.selectBatchIds(cateIds);
+                reserve.setCollections(collections);
+                reserve.setCateIds(cateIds.toArray(new Integer[0]));
+            }
+        }
+        
+        return PageResult.of(page, records);
     }
 
     /**
@@ -59,16 +84,32 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         LocalDate nextMonth = LocalDate.now().plusMonths(1);//下个月的日期
         String todayString = today.format(DateTimeFormatter.ISO_LOCAL_DATE);
         String nextMonthString = nextMonth.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        
+        // 如果是按藏品ID查询，先获取关联的展览ID
+        List<Integer> reserveIds = null;
+        if (pageQuery.getCateId() != null) {
+            reserveIds = reserveCollectionMapper.findReserveIdsByCateId(pageQuery.getCateId());
+            if (reserveIds.isEmpty()) {
+                return PageResult.of(new Page<>(), new ArrayList<>());
+            }
+        }
+        
         QueryWrapper<MsReserve> queryWrapper = new QueryWrapper<>();
-
-        // 添加过滤条件，过滤掉已经过时的预约信息，并且只显示近一个月内的预约信息
         queryWrapper.lambda()
-                .eq(pageQuery.getCateId() != null, MsReserve::getCateId, pageQuery.getCateId())
+                .in(reserveIds != null, MsReserve::getId, reserveIds)
                 .ge(MsReserve::getResDate, todayString)
-                .le(MsReserve::getResDate,nextMonthString);
+                .le(MsReserve::getResDate, nextMonthString);
 
         Page<MsReserve> page = this.page(pageQuery.toMpPage(), queryWrapper);
-        return PageResult.of(page, page.getRecords());
+        
+        // 获取每个展览关联的藏品信息
+        List<MsReserve> records = page.getRecords();
+        for (MsReserve reserve : records) {
+            List<Integer> cateIds = reserveCollectionMapper.findCateIdsByReserveId(reserve.getId());
+            reserve.setCateIds(cateIds.toArray(new Integer[0]));
+        }
+        
+        return PageResult.of(page, records);
     }
 
     public PageResult<MsReserve> listTop(PageQuery pageQuery) {
@@ -122,42 +163,22 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
             throw new IllegalArgumentException("预约信息中缺少藏品ID，请提供藏品ID！");
         }
 
-        // 获取所有相关藏品的信息
-        List<MsCollection> collections = new ArrayList<>();
+        // 设置预约信息的其他属性
+        msReserve.setResdSum(0);
+        msReserve.setCrtTm(StringUtils.getNowDateTIme());
+        save(msReserve);
+
+        // 关联多个藏品
         for (Integer cateId : cateIds) {
             MsCollection msCollection = collectionMapper.selectById(cateId);
             if (msCollection != null) {
-                collections.add(msCollection);
+                MsReserveCollection reserveCollection = new MsReserveCollection();
+                reserveCollection.setReserveId(msReserve.getId());
+                reserveCollection.setCateId(cateId);
+                reserveCollectionMapper.insert(reserveCollection);
             } else {
                 throw new IllegalArgumentException("指定的藏品ID不存在，请检查后重试！");
             }
-        }
-
-//        // 设置预约信息中的藏品名称
-//        StringBuilder cateNames = new StringBuilder();
-//        for (MsCollection collection : collections) {
-//            if (cateNames.length() > 0) {
-//                cateNames.append(", ");
-//            }
-//            cateNames.append(collection.getTitle());
-//        }
-//        msReserve.setCateName(cateNames.toString());
-//
-//        // 设置预约信息的其他属性
-//        msReserve.setResdSum(0);
-//        msReserve.setCrtTm(StringUtils.getNowDateTIme());
-//
-//        // 保存预约信息
-//        save(msReserve);
-        for (Integer cateId:cateIds) {
-            msReserve.setCateId(cateId);
-            MsCollection msCollection =  collectionMapper.selectById(cateId);
-            if(null != msCollection) {
-                msReserve.setCateName(msCollection.getTitle());
-            }
-            msReserve.setResdSum(0);
-            msReserve.setCrtTm(StringUtils.getNowDateTIme());
-            save(msReserve);
         }
     }
 
@@ -171,24 +192,24 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         if(msReserve == null) {
             throw new Exception("找不到原始记录，删除失败！");
         }
-        QueryWrapper<MsReserveDetial> detialQueryWrapper = new QueryWrapper<>();
-        detialQueryWrapper.lambda().eq(MsReserveDetial::getResId, id).eq(MsReserveDetial::getVldStat,"1");
-        List<MsReserveDetial> data = reserveDetialMapper.selectList(detialQueryWrapper);
+        QueryWrapper<MsReserveDetail> detialQueryWrapper = new QueryWrapper<>();
+        detialQueryWrapper.lambda().eq(MsReserveDetail::getResId, id).eq(MsReserveDetail::getVldStat,"1");
+        List<MsReserveDetail> data = reserveDetialMapper.selectList(detialQueryWrapper);
         if(!data.isEmpty()) {
             ExcepUtil.throwErr("该预约下存在有效的预约记录，无法删除！");
         }
         removeById(id);
     }
 
-    public List<MsReserveDetial> getUserReserve(Integer userId, Integer resId) {
-        QueryWrapper<MsReserveDetial> detialQueryWrapper = new QueryWrapper<>();
+    public List<MsReserveDetail> getUserReserve(Integer userId, Integer resId) {
+        QueryWrapper<MsReserveDetail> detialQueryWrapper = new QueryWrapper<>();
         if(null != userId) {
-            detialQueryWrapper.lambda().eq(MsReserveDetial::getUserId, userId);
+            detialQueryWrapper.lambda().eq(MsReserveDetail::getUserId, userId);
         }
         if(null != resId) {
-            detialQueryWrapper.lambda().eq(MsReserveDetial::getResId, resId);
+            detialQueryWrapper.lambda().eq(MsReserveDetail::getResId, resId);
         }
-        List<MsReserveDetial> detials = reserveDetialMapper.selectList(detialQueryWrapper);
+        List<MsReserveDetail> detials = reserveDetialMapper.selectList(detialQueryWrapper);
         return detials;
     }
 }

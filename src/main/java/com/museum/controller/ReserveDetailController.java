@@ -4,7 +4,7 @@ package com.museum.controller;
 import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
 import com.museum.domain.dto.ReserveQuery;
-import com.museum.domain.po.MsReserveDetial;
+import com.museum.domain.po.MsReserveDetail;
 import com.museum.service.impl.ReserveDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,12 +31,12 @@ public class ReserveDetailController {
 
     @PostMapping("/listDetailReserve")
     public JsonResult listDetailReserve(@RequestBody ReserveQuery pageQuery) {
-        PageResult<MsReserveDetial> result = reserveDetailService.listMsReserveDetail(pageQuery);
+        PageResult<MsReserveDetail> result = reserveDetailService.listMsReserveDetail(pageQuery);
         return JsonResult.result(result);
     }
 
     @PostMapping("/addDetail")
-    public JsonResult addDetail(@RequestBody MsReserveDetial detial) {
+    public JsonResult addDetail(@RequestBody MsReserveDetail detial) {
         try {
             reserveDetailService.addDetail(detial);
             return JsonResult.result("成功！");
@@ -47,7 +47,7 @@ public class ReserveDetailController {
     }
 
     @PostMapping("/editDetail")
-    public JsonResult editDetail(@RequestBody MsReserveDetial detial) {
+    public JsonResult editDetail(@RequestBody MsReserveDetail detial) {
         try {
             reserveDetailService.editDetail(detial);
             return JsonResult.result("成功！");
@@ -58,7 +58,7 @@ public class ReserveDetailController {
     }
 
     @PostMapping("/delDetail")
-    public JsonResult delDetail(@RequestBody MsReserveDetial msReserve) {
+    public JsonResult delDetail(@RequestBody MsReserveDetail msReserve) {
         try {
             reserveDetailService.delDetail(msReserve.getId());
             return JsonResult.result("成功！");

@@ -1,7 +1,7 @@
 package com.museum.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.museum.domain.po.MsReserveDetial;
+import com.museum.domain.po.MsReserveDetail;
 
 /**
  * <p>
@@ -10,6 +10,6 @@ import com.museum.domain.po.MsReserveDetial;
  *
  *@since 2023-12-19
  */
-public interface ReserveDetialMapper extends BaseMapper<MsReserveDetial> {
+public interface ReserveDetialMapper extends BaseMapper<MsReserveDetail> {
 
 }
