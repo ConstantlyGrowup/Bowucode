@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -25,8 +26,6 @@ public class MsReserve implements Serializable {
     private Integer id;
     private String title;
     private String resTyp;
-    private Integer cateId;
-    private String cateName;
     private Integer resSum;
     private String resDate;
     private String resTime;
@@ -36,4 +35,6 @@ public class MsReserve implements Serializable {
     private String crtTm;
     @TableField(exist = false)
     private Integer[] cateIds;
+    @TableField(exist = false)
+    private List<MsCollection> collections;
 }
