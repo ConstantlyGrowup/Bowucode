@@ -19,3 +19,7 @@ spring:
       max-request-size: 100MB
 knife4j: #开启增强模式
   enable: true
+
+deepseek:
+  api-key: your-api-key-here  # 替换成你的实际API key
+  base-url: https://api.deepseek.com

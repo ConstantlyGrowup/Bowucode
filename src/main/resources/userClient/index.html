@@ -365,18 +365,6 @@
                             console.log(err);
                         });
                     },
-                    // 鼠标移入
-                    handleMouseEnter(item) {
-                        if(item.origin) {
-                            this.listMsReserve(item.id)
-                        }
-                        const newsContent = document.getElementById(item.id); // 使用id获取HTML元素
-                        newsContent.style.display = 'block'
-                    },
-                    handleMouseLeave(item) {
-                        const newsContent = document.getElementById(item.id); // 使用id获取HTML元素
-                        newsContent.style.display = 'none'
-                    },
                     getData() {
                         post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
                             this.colTyps = response.data;
