@@ -65,10 +65,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     // 处理可能的chunk边界情况
                     buffer += decoder.decode(value, { stream: true });
 
+                    // 当需要更新UI时（例如，当你想要显示部分结果时）
+                    // 在这里处理buffer以移除多余的空格
+                    let processedBuffer = buffer.replace(/\s+/g, ' ').trim();  // 使用正则表达式替换多个空白字符为单个空格，并修剪首尾空格
+
                     // 直接更新DOM
-                    messageText.textContent = buffer;
+                    messageText.textContent = processedBuffer;
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
+
 
                 messageHistory.push({
                     role: "assistant",

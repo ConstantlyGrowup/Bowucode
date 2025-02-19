@@ -76,34 +76,14 @@
             <!-- 请将 'the-latest-version' 替换为最新版本号：https://mvnrepository.com/artifact/com.alibaba/dashscope-sdk-java -->
             <version>2.18.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-bom</artifactId>
-            <version>1.0.0-M1</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-bom</artifactId>
-            <version>0.8.1-SNAPSHOT</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
             <version>3.14.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
 
-            <artifactId>spring-ai-alibaba-starter</artifactId>
-
-            <version>1.0.0-M2</version>
-
-        </dependency>
 
 
         <dependency>
