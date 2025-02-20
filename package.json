@@ -1,0 +1,7 @@
+{
+  "name": "museum_server",
+  "version": "1.0.0",
+  "dependencies": {
+    "marked": "^15.0.7"
+  }
+}
