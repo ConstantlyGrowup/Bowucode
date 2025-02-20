@@ -3,7 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatForm = document.getElementById("chat-form");
     const userInput = document.getElementById("user-input");
 
-    // 存储对话历史
+    // 生成UUID函数（简化版）
+    function generateUUID() {
+        let d = new Date().getTime();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            let r = (d + Math.random()*16)%16 | 0;
+            d = Math.floor(d/16);
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
+
+    // 存储对话历史和sessionId
+    let sessionId = generateUUID(); // 创建一次性的sessionId
     const messageHistory = [{
         role: "assistant",
         content: "欢迎来到古董展览馆。我是您的导览僧，很高兴为您介绍我们珍贵的文物收藏。请问您对哪个朝代或者哪类文物最感兴趣？"
@@ -27,10 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
             userInput.disabled = true;
 
             // 构造请求URL
-            const baseUrl = '/api/ai/chat';
+            const baseUrl = '/api/ai/chat'; // 注意这里应该与后端配置的路径一致
             const params = new URLSearchParams({
                 prompt: message,
-                messages: JSON.stringify(messageHistory) // 发送整个聊天历史
+                sessionId: sessionId
             });
             const url = `${baseUrl}?${params}`;
 
@@ -55,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let receivedText = ''; // 用于累积接收的文本
 
             eventSource.onmessage = (event) => {
-                const data = event.data.replace('data:', ''); // 移除可能存在的"data:"前缀
+                const data = event.data; // 这里假设服务器不会发送"data:"前缀的数据
                 if (data === "[ovo-done]") {
                     // 收到结束标志，将累积的文本作为助手的消息添加到对话历史中
                     if (receivedText.trim()) { // 确保不是空消息
