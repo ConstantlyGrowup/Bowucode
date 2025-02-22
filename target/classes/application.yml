@@ -21,10 +21,10 @@ knife4j: #开启增强模式
   enable: true
 
 deepseek:
-  api-key: sk-d2cc2c56fe494ea1aebd8c6cbfee4b5a
+  api-key:
   base-url: https://api.deepseek.com/v1
 sili:
-  apiKey: sk-okyfpenukgiwlprqbhsutlelbnfakyhxfvcqftoyfkbyidnb
+  apiKey:
   baseUrl: https://api.siliconflow.cn/v1/
 tongyi:
   apiKey: sk-b4ca1a8b48734565907af761fb97c31d
