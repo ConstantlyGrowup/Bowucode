@@ -1,3 +1,8 @@
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@4.3.0/lib/marked.esm.min.js';
+// 配置 marked 的选项，处理换行
+marked.setOptions({
+    breaks: true // 将换行符 (\n) 转换为 <br> 标签
+});
 document.addEventListener("DOMContentLoaded", () => {
     const chatMessages = document.getElementById("chat-messages");
     const chatForm = document.getElementById("chat-form");
@@ -21,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }];
 
     // 初始欢迎消息
-    addBotMessage(messageHistory[0].content);
+     addBotMessage(messageHistory[0].content);
 
     // 修改后的submit事件监听
     chatForm.addEventListener("submit", (e) => {
@@ -79,7 +84,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     userInput.disabled = false;
                 } else {
                     receivedText += data; // 累积接收到的数据
-                    messageText.textContent = receivedText; // 更新DOM
+
+                    // 动态解析 Markdown 并更新 DOM
+                    const htmlContent = marked.parse(receivedText);
+                    messageText.innerHTML = htmlContent;
+
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
             };
@@ -115,12 +124,20 @@ document.addEventListener("DOMContentLoaded", () => {
         messageElement.classList.add("message", "bot-message");
 
         const avatarImg = document.createElement("img");
+        avatarImg.src = "monkTang.svg";
         avatarImg.alt = "Bot Avatar";
         avatarImg.classList.add("bot-avatar");
 
         const messageText = document.createElement("div");
         messageText.classList.add("message-text");
-        messageText.textContent = message;
+
+        // 将 Markdown 转换为 HTML
+        let htmlContent = marked.parse(message);
+
+        // 手动处理换行符
+        htmlContent = htmlContent.replace(/\n/g, '<br>');
+
+        messageText.innerHTML = htmlContent; // 使用 innerHTML 插入 HTML 内容
 
         messageElement.appendChild(avatarImg);
         messageElement.appendChild(messageText);

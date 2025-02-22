@@ -42,8 +42,8 @@ public class ChatController {
                 logger.debug("Full messages for session [{}]: {}", sessionId, fullMessages);
 
                 ApplicationParam param = ApplicationParam.builder()
-                        .apiKey("sk-b4ca1a8b48734565907af761fb97c31d")
-                        .appId("50caa8cd9ea148d0bf2339a65acebd44")
+                        .apiKey("sk-b6880b99b30a46d7832d5cc51fd0a9d4")
+                        .appId("4d3cd740ce964dd5865690dac8b01453")
                         .prompt(prompt)
                         .messages(fullMessages)
                         .incrementalOutput(true)
