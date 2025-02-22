@@ -1,5 +1,5 @@
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@4.3.0/lib/marked.esm.min.js';
-// 配置 marked 的选项，处理换行
+// 配置 marked 的选项,处理换行
 marked.setOptions({
     breaks: true // 将换行符 (\n) 转换为 <br> 标签
 });
