@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageElement.classList.add("message", "bot-message");
 
         const avatarImg = document.createElement("img");
-        avatarImg.src = "monkTang.svg";
+         avatarImg.src = "img/monkTang.svg";
         avatarImg.alt = "Bot Avatar";
         avatarImg.classList.add("bot-avatar");
 

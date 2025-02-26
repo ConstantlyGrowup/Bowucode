@@ -181,39 +181,69 @@
                     }
                 },
                 mounted() {
-                    const userStr = sessionStorage.getItem('user')
-                    if(userStr !== '' && null != userStr) {
-                        const user = JSON.parse(userStr)
-                        this.userInfo = user
-                        this.userInfo.rPassword = this.userInfo.password
-                        console.log(this.userInfo)
-                    }else {
-                        window.location.href='login.html'
+                    // 从 sessionStorage 中获取用户信息
+                    const userStr = sessionStorage.getItem('user');
+                    if (userStr !== '' && userStr != null) {
+                        const user = JSON.parse(userStr);
+
+                        // 检查是否包含 id
+                        if (!user.id) {
+                            alert('用户信息不完整，请重新登录！');
+                            window.location.href = 'login.html';
+                            return;
+                        }
+
+                        // 调用后端接口获取完整用户信息
+                        this.fetchUserInfo(user.id);
+                    } else {
+                        // 如果 sessionStorage 中没有用户信息，跳转到登录页
+                        window.location.href = 'login.html';
                     }
                 },
                 methods: {
+                    // 新增方法：通过用户 ID 获取完整用户信息
+                    fetchUserInfo(userId) {
+                        axios.get(`/api/user/userInfo/${userId}`)
+                            .then(response => {
+                                if (response.data.code === 200) {
+                                    // 成功获取用户信息
+                                    this.userInfo = response.data.data;
+                                    this.userInfo.rPassword = this.userInfo.password; // 初始化确认密码字段
+                                    console.log('用户信息已加载:', this.userInfo);
+                                } else {
+                                    alert(`获取用户信息失败：${response.data.msg}`);
+                                }
+                            })
+                            .catch(err => {
+                                console.error('获取用户信息时发生错误:', err);
+                                alert('获取用户信息失败，请稍后再试！');
+                            });
+                    },
+                    // 原有的 editUser 方法保持不变
                     editUser() {
-                        if(this.userInfo.mobile === '') {
-                            alert('请输入手机号！')
-                            return
+                        if (this.userInfo.mobile === '') {
+                            alert('请输入手机号！');
+                            return;
                         }
-                        if(this.userInfo.password === '') {
-                            alert('请输入密码！')
-                            return
+                        if (this.userInfo.password === '') {
+                            alert('请输入密码！');
+                            return;
                         }
-                        if(this.userInfo.password !== this.userInfo.rPassword) {
-                            alert('确认密码与原密码不一致！')
-                            return
+                        if (this.userInfo.password !== this.userInfo.rPassword) {
+                            alert('确认密码与原密码不一致！');
+                            return;
                         }
-                        post('user/editUserInfo', this.userInfo).then(response => {
-                            if(response.code !== 200) {
-                                alert(response.msg)
-                            }else {
-                                alert('修改成功！')
-                            }
-                        }).catch(err => {
-                            console.log(err);
-                        });
+                        post('user/editUserInfo', this.userInfo)
+                            .then(response => {
+                                if (response.code !== 200) {
+                                    alert(response.msg);
+                                } else {
+                                    alert('修改成功！');
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            });
                     }
                 }
             })

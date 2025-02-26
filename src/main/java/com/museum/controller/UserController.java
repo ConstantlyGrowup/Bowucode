@@ -3,16 +3,15 @@ package com.museum.controller;
 
 import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
+import com.museum.domain.dto.MsUserDTO;
 import com.museum.domain.po.MsUser;
 import com.museum.domain.query.PageQuery;
 import com.museum.service.impl.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 /**
  * <p>
@@ -36,8 +35,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public JsonResult login(@RequestBody MsUser user) {
-        MsUser dbUser = userService.login(user);
+    public JsonResult login(@RequestBody MsUser user, HttpSession session) {
+        MsUserDTO dbUser = userService.login(user,session);
         if(dbUser == null) {
             return JsonResult.failResult("用户名密码错误!！");
         }
@@ -48,9 +47,9 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public JsonResult register(@RequestBody MsUser msUser) {
+    public JsonResult register(@RequestBody MsUser msUser, HttpSession session) {
         try {
-            userService.saveMsUser(msUser);
+            userService.saveMsUser(msUser,session);
             return JsonResult.result("成功！");
         }catch (Exception e){
             e.printStackTrace();
@@ -76,6 +75,27 @@ public class UserController {
             userService.deluser(msUser.getId());
             return JsonResult.result("成功！");
         }catch (Exception e){
+            return JsonResult.failResult(e.getMessage());
+        }
+    }
+
+    /**
+     * 收到用户id，返回所有信息到“我的”
+     * @param userId
+     * @return
+     */
+    @GetMapping ("/userInfo/{id}")
+    public JsonResult userInfo(@PathVariable("id") Integer userId)
+    {
+        try{
+            MsUser userInfo = userService.getuser(userId);
+            if(userInfo==null)
+            {
+                throw new Exception("该用户id不存在！");
+            }else {
+                return JsonResult.result(userInfo);
+            }
+        } catch (Exception e) {
             return JsonResult.failResult(e.getMessage());
         }
     }
