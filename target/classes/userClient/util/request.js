@@ -7,11 +7,12 @@ const instance = axios.create({
 // 请求拦截器：自动添加 token 到请求头
 instance.interceptors.request.use(
     (config) => {
-        // 从 localStorage 中获取 token
-        const token = localStorage.getItem('token');
+        // 从 sessionStorage 中获取 token
+        const token = sessionStorage.getItem('token');
         if (token) {
-            // 添加'Bearer'前缀，这是常见的JWT认证格式
-            config.headers.Authorization = `Bearer ${token}`;
+            // 检查 token 是否已经包含 Bearer 前缀
+            const finalToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+            config.headers.Authorization = finalToken;
         }
         return config;
     },
@@ -27,8 +28,18 @@ instance.interceptors.response.use(
     },
     (error) => {
         if (error.response && error.response.status === 401) {
-            alert('您的会话已过期，请重新登录');
-            window.location.href = 'login.html'; // 跳转到登录页面
+            console.log('用户未登录或会话已过期');
+            // 清除无效的 token
+            sessionStorage.removeItem('token');
+            
+            // 对于需要登录的页面，重定向到登录页
+            if (window.location.pathname.includes('setting.html') || 
+                window.location.pathname.includes('myReserveDetail.html') ||
+                window.location.pathname.includes('ChatTest.html')) {
+                alert('请先登录！');
+                window.location.href = 'login.html';
+                return;
+            }
         }
         return Promise.reject(error);
     }

@@ -29,29 +29,27 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-//        //获取session
-//        HttpSession session = request.getSession();
-//        //获取用户
-//        MsUser user = (MsUser) session.getAttribute("user");
-//        //判断用户是否存在
-//        if(user==null){
-//            //response.setStatus(401);
-//            // 重定向到登录页面
-//            response.sendRedirect("/login.html");
-//            return false;
-//        }
-//        MsUserDTO userDTO = new MsUserDTO();
-//        BeanUtils.copyProperties(user,userDTO);
-//        //存在，保存用户信息的ThreadLocal
-//        UserHolder.saveUser(userDTO);
-//        //放行
-//        return true;
+        // 获取请求路径
+        String requestURI = request.getRequestURI();
+        
+        // 对于 /user/me 接口，即使没有 token 也允许访问，但不设置 UserHolder
+        if (requestURI.endsWith("/user/me")) {
+            // 尝试获取 token
+            String authorization = request.getHeader("Authorization");
+            if (StrUtil.isBlank(authorization)) {
+                // 未登录用户访问 /user/me，直接放行，不设置 UserHolder
+                return true;
+            }
+            
+            // 有 token，继续正常处理
+        }
+        
         //1.获取请求头中的token
-        // 获取Authorization头部中的token
         String authorization = request.getHeader("Authorization");
         if(StrUtil.isBlank(authorization)){
             //不存在，拦截
             response.setStatus(401);
+            // 不要重定向，让前端处理401状态码
             return false;
         }
 
@@ -73,7 +71,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         {
             //不存在，拦截
             response.setStatus(401);
-            response.sendRedirect("login.html");
+            // 不要重定向，让前端处理401状态码
             return false;
         }
         //3.将查询到的Hash数据转化为UserDTO对象

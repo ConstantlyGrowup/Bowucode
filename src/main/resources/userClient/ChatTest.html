@@ -8,9 +8,13 @@
     <link rel="stylesheet" href="css/ChatTest.css">
     <!-- 引入 marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入 Vue 和 Axios -->
+    <script src="./util/vue.js"></script>
+    <script src="./util/axios.js"></script>
+    <script src="./util/request.js"></script>
 </head>
 <body>
-<div class="background-gradient">
+<div id="app" class="background-gradient">
     <header>
         <h1 style="color: rgba(223,148,3,0.73)">文旅导览僧</h1>
         <div class="cloud-decoration left-cloud"></div>
@@ -34,6 +38,45 @@
 </div>
 
 <script type="module" src="js/ChatTest.js"></script>
+<script>
+    // 添加鉴权检查
+    new Vue({
+        el: '#app',
+        mounted() {
+            // 检查用户是否登录
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                alert('请先登录！');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 验证用户登录状态
+            this.checkLoginStatus();
+        },
+        methods: {
+            // 验证用户登录状态
+            checkLoginStatus() {
+                get('/user/me')
+                    .then(response => {
+                        if (response.code === 200 && response.data && response.data.id) {
+                            // 用户已登录，可以继续使用聊天功能
+                            console.log('用户已登录:', response.data);
+                        } else {
+                            // 用户未登录或登录状态无效
+                            alert('请先登录！');
+                            window.location.href = 'login.html';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('获取用户信息失败:', err);
+                        alert('请先登录！');
+                        window.location.href = 'login.html';
+                    });
+            }
+        }
+    });
+</script>
 </body>
 </html>
 

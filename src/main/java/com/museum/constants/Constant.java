@@ -3,7 +3,7 @@ package com.museum.constants;
 public interface Constant {
     // 数据字段 - create_time
     public static final String LOGIN_USER_KEY = "login:token:";
-    public static final Long LOGIN_USER_TTL = 36000L;
+    public static final Long LOGIN_USER_TTL = 60L;
     public static final String DATA_FIELD_NAME_CREATE_TIME = "create_time";
     public static final String USER_BLOCKED="blocked";
     public static final String  CONSTRAIN_SYSTEM_ROLE="# 角色\n" +

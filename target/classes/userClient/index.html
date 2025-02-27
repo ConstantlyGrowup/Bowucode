@@ -243,7 +243,7 @@
                     </a>
                 </div>
 				<div class="bp-col">
-					<a href="myReserveDetail.html">
+					<a href="ReserveDetail.html">
 						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
 						<div class="bp-text">我的预约</div>
 					</a>
@@ -311,28 +311,24 @@
                 mounted() {
                     this.getData()
                     this.getColData()
-                    this.fetchUserMe() // 新增：获取用户信息
+                    this.fetchUserMe() // 获取用户信息
                     this.getAnnouncementList()
-                    alert(localStorage.getItem('token'))
                 },
                 methods: {
-                    methods: {
-                        // 新增：通过 token 获取用户信息
-                        async fetchUserMe() {
-                            try {
-                                // 从 localStorage 中读取 token
-                                const token = localStorage.getItem('token');
-                                console.log('当前token为： ',token)
-                                // 如果 token 和 userInf 都为空，表示当前为游客模式，不调用 me 接口
-                                if (!token) {
-                                    console.log('未检测到 token，当前为游客模式');
-                                    this.userInf = null; // 确保用户信息为空
-                                    return;
-                                }
+                    fetchUserMe() {
+                        try {
+                            // 从 sessionStorage 中读取 token
+                            const token = sessionStorage.getItem('token');
+                            console.log('当前token为： ', token)
+                            // 如果 token 为空，表示当前为游客模式，不调用 me 接口
+                            if (!token) {
+                                console.log('未检测到 token，当前为游客模式');
+                                this.userInf = {}; // 确保用户信息为空对象
+                                return;
+                            }
 
-                                // 调用 /api/user/me 接口获取用户信息（请求拦截器会自动添加 token）
-                                const response = await get('/user/me'); // 使用封装的 get 方法
-
+                            // 调用 /api/user/me 接口获取用户信息
+                            get('/user/me').then(response => {
                                 // 检查接口返回的状态码
                                 if (response.code === 200) {
                                     if (response.data) {
@@ -342,22 +338,22 @@
                                     } else {
                                         // 数据为空，表示 token 可能无效或过期
                                         console.log('未获取到用户登录信息，当前为游客模式');
-                                        this.userInf = null; // 清空用户信息或设置为默认值
+                                        this.userInf = {}; // 清空用户信息
                                     }
                                 } else {
                                     // 请求成功但返回了错误码
                                     console.error('请求失败:', response.msg);
-                                    this.userInf = null; // 清空用户信息
+                                    this.userInf = {}; // 清空用户信息
                                 }
-                            } catch (error) {
+                            }).catch(error => {
                                 // 网络错误或后端异常
                                 console.error('获取用户信息时发生异常:', error);
-
-                                // 响应拦截器已经处理了 401 错误，这里只需要处理其他异常情况
-                                alert('啊哦，网站出了点小问题');
-                                window.location.href = 'index.html';
-                            }
-                        },
+                                this.userInf = {}; // 清空用户信息
+                            });
+                        } catch (error) {
+                            console.error('fetchUserMe方法执行出错:', error);
+                            this.userInf = {}; // 确保用户信息为空对象
+                        }
                     },
                     checkMenu(item) {
                         this.menuId = item.id
@@ -474,22 +470,46 @@
                     }
                 }
             })
+
             const vm2 = new Vue({
                 el: '#loginVue',
                 data: {
                     userInf: {} // 用户信息从接口获取
                 },
+                mounted() {
+                    // 添加mounted钩子，获取用户信息
+                    this.fetchUserInfo();
+                },
                 methods: {
+                    // 获取用户信息
+                    fetchUserInfo() {
+                        const token = sessionStorage.getItem('token');
+                        if (!token) {
+                            this.userInf = {};
+                            return;
+                        }
+                        
+                        get('/user/me').then(response => {
+                            if (response.code === 200 && response.data) {
+                                this.userInf = response.data;
+                            } else {
+                                this.userInf = {};
+                            }
+                        }).catch(error => {
+                            console.error('获取用户信息失败:', error);
+                            this.userInf = {};
+                        });
+                    },
                     // 修改退出登录方法
                     async loginOut() {
                         try {
                             // 调用后端接口使 token 失效
-                            await axios.post('/api/user/logout');
+                            await post('/user/logout');
                         } catch (error) {
                             console.error('退出失败:', error);
                         } finally {
                             // 清除本地 token
-                            localStorage.removeItem('token');
+                            sessionStorage.removeItem('token');
                             // 跳转到登录页
                             window.location.href = 'login.html';
                         }

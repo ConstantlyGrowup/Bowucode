@@ -134,9 +134,8 @@ public class UserController {
      * 用于主页获得用户信息（DTO版）
      * @return
      */
-    @GetMapping ("/me")
-    public JsonResult me()
-    {
+    @GetMapping("/me")
+    public JsonResult me() {
         // 从 ThreadLocal 中获取当前用户信息（由拦截器设置）
         MsUserDTO userDTO = UserHolder.getUser();
         // 返回用户信息,没有内容对应游客状态，有内容对应登录状态
