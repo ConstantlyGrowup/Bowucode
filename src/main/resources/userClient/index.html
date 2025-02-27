@@ -8,7 +8,6 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-touch-fullscreen" content="yes">
 		<meta name="HandheldFriendly" content="True">
-		<link rel="icon" href="favicon.ico" type="image/x-icon">
 		<!-- Bootstrap v4.3.1 CSS -->
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
 		<!-- Custom CSS -->
@@ -282,6 +281,7 @@
                          { id: 3, name: '近期公告' },
                         // { id: 4, name: '热门解说' }
                     ],
+                    userInf: {}, // 用户信息从接口获取
                     showAnnooucementPop: false,
                     annoObj: {},
                     menuId: 1,
@@ -294,7 +294,6 @@
                         menuName: '藏品一览'
                     },
                     feedContext: '',
-                    userInf: {},
                     isNewsDesc: false,
                     collectionDataDesc: {},
                     resSum: 0,
@@ -312,14 +311,53 @@
                 mounted() {
                     this.getData()
                     this.getColData()
-                    const userStr = sessionStorage.getItem('user')
-                    if(userStr !== '' && null != userStr) {
-                        const user = JSON.parse(userStr)
-                        this.userInf = user
-                    }
+                    this.fetchUserMe() // 新增：获取用户信息
                     this.getAnnouncementList()
                 },
                 methods: {
+                    methods: {
+                        // 新增：通过 token 获取用户信息
+                        async fetchUserMe() {
+                            try {
+                                // 从 localStorage 中读取 token
+                                const token = localStorage.getItem('token');
+                                console.log('当前token为： ',token)
+                                // 如果 token 和 userInf 都为空，表示当前为游客模式，不调用 me 接口
+                                if (!token) {
+                                    console.log('未检测到 token，当前为游客模式');
+                                    this.userInf = null; // 确保用户信息为空
+                                    return;
+                                }
+
+                                // 调用 /api/user/me 接口获取用户信息（请求拦截器会自动添加 token）
+                                const response = await get('/user/me'); // 使用封装的 get 方法
+
+                                // 检查接口返回的状态码
+                                if (response.code === 200) {
+                                    if (response.data) {
+                                        // 有用户数据，表示已登录
+                                        this.userInf = response.data;
+                                        console.log('已获取用户信息:', this.userInf);
+                                    } else {
+                                        // 数据为空，表示 token 可能无效或过期
+                                        console.log('未获取到用户登录信息，当前为游客模式');
+                                        this.userInf = null; // 清空用户信息或设置为默认值
+                                    }
+                                } else {
+                                    // 请求成功但返回了错误码
+                                    console.error('请求失败:', response.msg);
+                                    this.userInf = null; // 清空用户信息
+                                }
+                            } catch (error) {
+                                // 网络错误或后端异常
+                                console.error('获取用户信息时发生异常:', error);
+
+                                // 响应拦截器已经处理了 401 错误，这里只需要处理其他异常情况
+                                alert('啊哦，网站出了点小问题');
+                                window.location.href = 'index.html';
+                            }
+                        },
+                    },
                     checkMenu(item) {
                         this.menuId = item.id
                         this.queryInfo.menuName = item.name
@@ -336,44 +374,15 @@
                         this.showReservePop = true
                         this.popHtml = item.resDes
                     },
-                    addDetail(val) {
-                        const userStr = sessionStorage.getItem('user')
-                        if(userStr==null || userStr === '') {
-                            window.location.href='login.html'
-                            return
-                        }
-                        const user = JSON.parse(userStr)
-                        const detail = {
-                            userId: user.id,
-                            userName: user.username,
-                            resId: val.id,
-                            cateId: val.cateId,
-                            cateTitle:  this.collectionData.title,
-                            resType:  val.resType,
-                            resDate:  val.resDate,
-                            resTime:  val.resTime,
-                            resSession:  val.resSession
-                        }
-                        post('/reserveDetail/addDetail', detail).then(response => {
-                            if(response.code === 200) {
-                                this.getColData()
-                                alert('成功！')
-                            }else {
-                                alert(response.msg)
-                            }
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
                     getData() {
-                        post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
+                        post('/dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
                             this.colTyps = response.data;
                         }).catch(err => {
                             console.log(err);
                         });
                     },
                     async getAnnouncementList() {
-                        post('announcement/listMsAnnouncementTop', {}).then(res => {
+                        post('/announcement/listMsAnnouncementTop', {}).then(res => {
                             if (res.code !== 200) {
                                 alert(res.msg)
                                 return
@@ -391,21 +400,6 @@
                     getColData() {
                         post('/collect/getdataTop', this.queryInfo).then(response => {
                             this.collectionData = response.data.list;
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    listMsReserve(id) {
-                        this.resSum = 0
-                        this.resdSum = 0
-                        post('/reserve/listMsReserve', {cateId: id}).then(response => {
-                            this.collectionDataDesc = response.data.list;
-                            this.collectionDataDesc.forEach(r => {
-                                this.resSum += r.resSum
-                                if(r.resdSum !== null) {
-                                    this.resdSum += r.resdSum
-                                }
-                            })
                         }).catch(err => {
                             console.log(err);
                         });
@@ -439,7 +433,7 @@
                         });
                     },
                     getAnnouncementData() {
-                        post('announcement/listMsAnnouncement', this.queryInfo)
+                        post('/announcement/listMsAnnouncement', this.queryInfo)
                             .then(response => {
                                 if (response.code === 200) {
                                     this.announcementData = response.data.list || [];
@@ -482,19 +476,22 @@
             const vm2 = new Vue({
                 el: '#loginVue',
                 data: {
-                    userInf: {}
-                },
-                mounted() {
-                    const userStr = sessionStorage.getItem('user')
-                    if(userStr !== '' && null != userStr) {
-                        const user = JSON.parse(userStr)
-                        this.userInf = user
-                    }
+                    userInf: {} // 用户信息从接口获取
                 },
                 methods: {
-                    loginOut() {
-                        sessionStorage.clear()
-                        window.location.href='login.html'
+                    // 修改退出登录方法
+                    async loginOut() {
+                        try {
+                            // 调用后端接口使 token 失效
+                            await axios.post('/api/user/logout');
+                        } catch (error) {
+                            console.error('退出失败:', error);
+                        } finally {
+                            // 清除本地 token
+                            localStorage.removeItem('token');
+                            // 跳转到登录页
+                            window.location.href = 'login.html';
+                        }
                     }
                 }
             })

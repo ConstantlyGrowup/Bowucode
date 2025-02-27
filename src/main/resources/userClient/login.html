@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-touch-fullscreen" content="yes">
 		<meta name="HandheldFriendly" content="True">
-		<link rel="icon" href="favicon.ico" type="image/x-icon">
+
 		<!-- Bootstrap v4.3.1 CSS -->
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
 		<!-- Custom CSS -->
@@ -143,13 +143,17 @@
                 methods: {
                     login() {
                         post('user/login', this.userInf).then(response => {
-                            if(response.code !== 200) {
+                            if (response.code !== 200) {
                                 // 根据后端返回的消息显示不同的提示
                                 alert(response.msg || '登录失败，请检查您的用户名或密码');
                             } else {
-                                const user = response.data
-                                sessionStorage.setItem('user', JSON.stringify(user))
-                                window.location.href = 'index.html'
+                                // 获取后端返回的 token
+                                const token = response.data;
+                                console.info('获取到token:',token)
+                                // 将 token 存储到 localStorage
+                                localStorage.setItem('token', token);
+                                // 跳转到首页
+                                window.location.href = 'index.html';
                             }
                         }).catch(err => {
                             console.error(err);

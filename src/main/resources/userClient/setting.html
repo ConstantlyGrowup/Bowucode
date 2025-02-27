@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-touch-fullscreen" content="yes">
 		<meta name="HandheldFriendly" content="True">
-		<link rel="icon" href="favicon.ico" type="image/x-icon">
+
 		<!-- Bootstrap v4.3.1 CSS -->
 		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
 		<!-- Custom CSS -->
@@ -163,7 +163,7 @@
             const vm = new Vue({
                 el: '#content',
                 data: {
-                    userInfo : {
+                    userInfo: {
                         username: '',
                         password: '',
                         rPassword: '',
@@ -171,39 +171,38 @@
                         mobile: '',
                         nickname: '',
                         idCard: '',
-                        state: 1
+                        state: 0
                     },
-                    collectionData : [],
+                    collectionData: [],
                     queryInfo: {
                         name: '',
                         pagenum: 1,
                         pagesize: 8
-                    }
+                    },
+                    logSuccess: false,
+
                 },
                 mounted() {
-                    // 从 sessionStorage 中获取用户信息
-                    const userStr = sessionStorage.getItem('user');
-                    if (userStr !== '' && userStr != null) {
-                        const user = JSON.parse(userStr);
-
-                        // 检查是否包含 id
-                        if (!user.id) {
-                            alert('用户信息不完整，请重新登录！');
-                            window.location.href = 'login.html';
+                    // 从 localStorage 中获取 token
+                    const token = localStorage.getItem('token');
+                    if (token === null) {
+                        alert('请先登录！');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    // 验证用户是否登录
+                    this.fetchUserMe();
+                },
+                methods: {
+                    // 获取用户完整信息
+                    fetchUserInfo() {
+                        // 只有在登录成功的情况下才获取详细用户信息
+                        if (!this.logSuccess) {
+                            console.log('用户未登录，不获取详细信息');
                             return;
                         }
 
-                        // 调用后端接口获取完整用户信息
-                        this.fetchUserInfo(user.id);
-                    } else {
-                        // 如果 sessionStorage 中没有用户信息，跳转到登录页
-                        window.location.href = 'login.html';
-                    }
-                },
-                methods: {
-                    // 新增方法：通过用户 ID 获取完整用户信息
-                    fetchUserInfo(userId) {
-                        axios.get(`/api/user/userInfo/${userId}`)
+                        axios.get('/api/user/userInfo')
                             .then(response => {
                                 if (response.data.code === 200) {
                                     // 成功获取用户信息
@@ -219,6 +218,47 @@
                                 alert('获取用户信息失败，请稍后再试！');
                             });
                     },
+
+                    async fetchUserMe() {
+                        try {
+                            // 调用 /api/user/me 接口验证用户登录状态
+                            const response = await axios.get('/api/user/me');
+
+                            // 检查接口返回的状态码
+                            if (response.data.code === 200) {
+                                if (response.data.data) {
+                                    // 有用户数据，表示已登录
+                                    this.logSuccess = true; // 标记为已登录
+                                    console.log('已验证用户登录状态:', response.data.data);
+
+                                    // 登录成功后，获取详细用户信息
+                                    this.fetchUserInfo();
+                                } else {
+                                    // 数据为空，当前页面无法访问
+                                    alert('您未登录！');
+                                    window.location.href = 'login.html';
+                                }
+                            } else {
+                                // API 返回错误
+                                alert(`验证登录状态失败：${response.data.msg}`);
+                                window.location.href = 'login.html';
+                            }
+                        } catch (error) {
+                            // 捕获网络错误或后端异常
+                            if (error.response && error.response.status === 401) {
+                                // 拦截器返回 401，表示用户未登录
+                                console.log('用户未登录，跳转到登录页面');
+                                alert('请先登录！');
+                                window.location.href = 'login.html';
+                            } else {
+                                // 其他异常情况
+                                console.error('获取用户登录状态时发生异常:', error);
+                                alert('啊哦，网站出了点小问题');
+                                window.location.href = 'index.html';
+                            }
+                        }
+                    },
+
                     // 原有的 editUser 方法保持不变
                     editUser() {
                         if (this.userInfo.mobile === '') {
@@ -233,10 +273,10 @@
                             alert('确认密码与原密码不一致！');
                             return;
                         }
-                        post('user/editUserInfo', this.userInfo)
+                        axios.post('/api/user/editUserInfo', this.userInfo)
                             .then(response => {
-                                if (response.code !== 200) {
-                                    alert(response.msg);
+                                if (response.data.code !== 200) {
+                                    alert(response.data.msg);
                                 } else {
                                     alert('修改成功！');
                                 }
@@ -246,7 +286,7 @@
                             });
                     }
                 }
-            })
+            });
         </script>
 </body>
 </html>

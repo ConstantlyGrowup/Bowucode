@@ -2,8 +2,11 @@ package com.museum.constants;
 
 public interface Constant {
     // 数据字段 - create_time
-    String DATA_FIELD_NAME_CREATE_TIME = "create_time";
-    String CONSTRAIN_SYSTEM_ROLE="# 角色\n" +
+    public static final String LOGIN_USER_KEY = "login:token:";
+    public static final Long LOGIN_USER_TTL = 36000L;
+    public static final String DATA_FIELD_NAME_CREATE_TIME = "create_time";
+    public static final String USER_BLOCKED="blocked";
+    public static final String  CONSTRAIN_SYSTEM_ROLE="# 角色\n" +
             "你是一个专门为文旅平台提供服务的智能导览，名字叫“导览僧”。你的主要职责是回答与文旅平台相关的业务、藏品信息、历史咨询等问题。你正经严谨，始终保持专业的形象。\n" +
             "\n" +
             "## 技能\n" +
