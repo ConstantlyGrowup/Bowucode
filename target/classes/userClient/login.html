@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>“黑悟空”主题数字文旅平台</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-touch-fullscreen" content="yes">
+		<meta name="HandheldFriendly" content="True">
+
+		<!-- Bootstrap v4.3.1 CSS -->
+		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/theme.css">
+		<!-- Slick CSS -->
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
+		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
+		<!-- Magnific Popup core CSS file -->
+		<link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
+		<!-- Font Awesome Free 5.10.2 CSS JS -->
+		<link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
+		<script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
+        <script src="./util/vue.js"></script>
+        <script src="./util/axios.js"></script>
+        <script src="./util/request.js"></script>
+	</head>
+<body class="default">
+		<div class="preloading">
+			<div class="wrap-preload">
+				<div class="cssload-loader"></div>
+			</div>
+		</div>
+			<nav class="navbar navbar-expand-lg navbar-light bg-header">
+				<div class="container-fluid">
+					<div class="logo">“黑悟空”主题数字文旅平台</div>
+				</div>
+			</nav>
+        <div id="content">
+            <div class="content-wrap page-login">
+                <div class="subsite-banner">
+                    <img src="img/subtitle-banner-log.jpg">
+                </div>
+                <div class="subsite subsite-with-banner">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="subsite-heading">
+                                用户登录
+                            </div>
+                        </div>
+                    </div>
+                    <form class="form-group">
+
+                        <div class="row field-row">
+                            <div class="col">
+                                <label>用户名</label>
+                                <div class="field-group">
+                                    <i class="fas fa-user-circle"></i>
+                                    <input type="text" class="form-control with-icon"  v-model="userInf.username" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row">
+                            <div class="col">
+                                <label>密码</label>
+                                <div class="field-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" class="form-control with-icon" v-model="userInf.password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row login-submit">
+                            <div class="col">
+                                <div class="button">
+                                    <button type="button" class="theme-button" @click="login()">登录</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row field-row text-with-link">
+                            <div class="col">
+                                <div class="field-group">
+                                    <a href="register.html"> 还没有用户，注册一个 </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+			<div class="bottom-panel">
+				<div class="bp-col">
+					<a href="index.html">
+						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+						<div class="bp-text">首页</div>
+					</a>
+				</div>
+                <div class="bp-col">
+                    <a href="col-list.html">
+                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+                        <div class="bp-text">藏品</div>
+                    </a>
+                </div>
+				<div class="bp-col">
+					<a href="myReserveDetail.html">
+						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+						<div class="bp-text">我的预约</div>
+					</a>
+				</div>
+				<div class="bp-col">
+					<a href="setting.html">
+						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+						<div class="bp-text">个人中心</div>
+					</a>
+				</div>
+			</div>
+			<!-- .Bottom Panel  -->
+			<div class="overlay"></div>
+			<!-- Optional JavaScript -->
+			<!-- jQuery v3.4.1 -->
+			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+			<!--  Bootstrap v4.3.1 JS -->
+			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+			<!-- Magnific Popup core JS file -->
+			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+			<!-- Slick JS -->
+			<script src="lib/slick/slick/slick.min.js"></script>
+			<!--  Custom JS -->
+			<script src="js/theme.js"></script>
+        <script>
+            const vm = new Vue({
+                el: '#content',
+                data: {
+                    userInf: {
+                        username: '',
+                        password: ''
+                    }
+                },
+                mounted() {
+                },
+                methods: {
+                    login() {
+                        post('user/login', this.userInf).then(response => {
+                            if (response.code !== 200) {
+                                // 根据后端返回的消息显示不同的提示
+                                alert(response.msg || '登录失败，请检查您的用户名或密码');
+                            } else {
+                                // 获取后端返回的 token
+                                const token = response.data;
+                                console.info('获取到token:',token)
+                                // 将 token 存储到 localStorage
+                                localStorage.setItem('token', token);
+                                // 跳转到首页
+                                window.location.href = 'index.html';
+                            }
+                        }).catch(err => {
+                            console.error(err);
+                            // 网络或其他错误，可以显示一个通用的错误提示
+                            alert('登录失败，请稍后重试或联系管理员');
+                        });
+                    }
+                }
+            });
+        </script>
+</body>
+</html>
