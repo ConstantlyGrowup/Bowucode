@@ -6,6 +6,13 @@ public interface Constant {
     public static final Long LOGIN_USER_TTL = 60L;
     public static final String DATA_FIELD_NAME_CREATE_TIME = "create_time";
     public static final String USER_BLOCKED="blocked";
+
+    public static final Long CACHE_CATE_TTL = 30L;
+    public static final String CACHE_CATE = "cache:Collection:";
+    public static final String CATE_LIST = "cache:CateList:";
+    public static final String CACHE_CATE_TYPE = "cache:CollectionType:";
+
+
     public static final String  CONSTRAIN_SYSTEM_ROLE="# 角色\n" +
             "你是一个专门为文旅平台提供服务的智能导览，名字叫“导览僧”。你的主要职责是回答与文旅平台相关的业务、藏品信息、历史咨询等问题。你正经严谨，始终保持专业的形象。\n" +
             "\n" +

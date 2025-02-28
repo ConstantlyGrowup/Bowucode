@@ -1,5 +1,8 @@
 package com.museum.service.impl;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -10,7 +13,17 @@ import com.museum.domain.po.MsCollection;
 import com.museum.domain.query.PageQuery;
 import com.museum.mapper.CollectionMapper;
 import com.museum.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static com.museum.constants.Constant.CACHE_CATE_TTL;
+import static com.museum.constants.Constant.CATE_LIST;
 
 /**
  * <p>
@@ -20,11 +33,24 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CollectionService extends ServiceImpl<CollectionMapper, MsCollection> implements IService<MsCollection> {
+    //TODO:更新数据库数据的操作，需要保持数据一致性
+    //TODO:缓存藏品信息，需结合布隆过滤器、逻辑过期、缓存空值去预防缓存击穿、缓存穿透
+    //TODO:先做一个细分的整体商户缓存
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 获取展品列表
+     * 获取coll-list该页面下所有藏品
+     * @param pageQuery
      * @return
      */
+    public PageResult<MsCollection> listMsCollectionList(PageQuery pageQuery)
+    {
+        //按照分页查询
+        Page<MsCollection> page = lambdaQuery().orderByDesc(MsCollection::getCrtTm).page(pageQuery.toMpPage());
+        return PageResult.of(page,page.getRecords());
+    }
     public PageResult<MsCollection> listMsCollection(CollectionQuery pageQuery) {
         LambdaQueryChainWrapper<MsCollection> lambdaQueryChainWrapper = lambdaQuery().like(MsCollection::getTitle, pageQuery.getName());
         if(null != pageQuery.getId()) {

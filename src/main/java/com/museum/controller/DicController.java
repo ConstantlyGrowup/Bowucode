@@ -44,6 +44,7 @@ public class DicController {
         }
     }
 
+    //以上为客户端的接口
     @PostMapping("/delDic")
     public JsonResult delDic(@RequestBody MsDic dic) {
         try {

@@ -147,10 +147,8 @@
 					collectionData : [],
 					userInfo: null,
 					queryInfo: {
-						name: '',
 						pagenum: 1,
 						pagesize: 8,
-						cateId: ''
 					}
 				},
 				created() {
@@ -159,8 +157,7 @@
 					console.log('Vue instance created');
 					const typ = getQueryString('type')
 					this.queryInfo.cateId = typ
-					this.getData()
-					this.getColData()
+					this.getColDataList()
 					this.listDicByTyp()
 				},
 				methods: {
@@ -179,13 +176,6 @@
 							console.error('获取用户信息失败:', err);
 						}
 					},
-					getData() {
-						post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
-							this.colTyps = response.data;
-						}).catch(err => {
-							console.log(err);
-						});
-					},
 					listDicByTyp() {
 						post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
 							this.colTyps = response.data;
@@ -193,8 +183,8 @@
 							console.log(err);
 						});
 					},
-					getColData() {
-						post('/collect/getdata', this.queryInfo).then(response => {
+					getColDataList() {
+						post('/collect/getdataList', this.queryInfo).then(response => {
 							this.collectionData = response.data.list;
 						}).catch(err => {
 							console.log(err);

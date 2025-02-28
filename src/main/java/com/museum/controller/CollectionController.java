@@ -34,6 +34,17 @@ public class CollectionController {
     @Resource
     ReserveService reserveService;
 
+    /**
+     *用于获取页面所有藏品
+     * @param pageQuery
+     * @return
+     */
+    @PostMapping("/getdataList")
+    public JsonResult getdataList(@RequestBody PageQuery pageQuery) {
+        PageResult<MsCollection> users = collectionService.listMsCollectionList(pageQuery);
+        return JsonResult.result(users);
+    }
+
     @PostMapping("/getdata")
     public JsonResult getdata(@RequestBody CollectionQuery pageQuery) {
         PageResult<MsCollection> users = collectionService.listMsCollection(pageQuery);
