@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>"黑悟空"主题数字文旅平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="HandheldFriendly" content="True">
+
+    <!-- Bootstrap v4.3.1 CSS -->
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <!-- Font Awesome -->
+    <link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+    <script src="./util/vue.js"></script>
+    <script src="./util/axios.js"></script>
+    <script src="./util/request.js"></script>
+    
+    <style>
+        .valid { color: #28a745; }
+        .invalid { color: #dc3545; }
+        .reservation-container {
+            padding: 15px;
+            margin: 70px 0 60px; /* 顶部和底部留出空间 */
+            max-width: 1200px; /* 限制最大宽度 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .reservation-table {
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto; /* 在小屏幕上支持水平滚动 */
+        }
+        /* 移动端卡片式布局 */
+        @media (max-width: 768px) {
+            .reservation-table table {
+                display: none; /* 隐藏表格 */
+            }
+            
+            .mobile-card {
+                display: block;
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 15px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-card-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+            
+            .mobile-card-label {
+                color: #666;
+                width: 80px;
+            }
+            
+            .mobile-card-value {
+                flex: 1;
+                text-align: right;
+            }
+            
+            .mobile-card-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 10px;
+                gap: 10px;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-card {
+                display: none; /* 在桌面端隐藏卡片视图 */
+            }
+        }
+        
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 12px;
+        }
+        .page-title {
+            color: #333;
+            margin: 20px 0;
+            padding: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 1.5rem;
+        }
+        
+        /* 响应式布局调整 */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.2rem;
+                margin: 15px 0;
+            }
+            .reservation-container {
+                padding: 10px;
+                margin-top: 60px;
+            }
+        }
+        
+        /* 自定义按钮样式 */
+        .theme-button {
+            background-color: #2450a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+        
+        .theme-button:hover {
+            background-color: #1a3b7a;
+        }
+        
+        .theme-button.danger {
+            background-color: #dc3545;
+        }
+        
+        .theme-button.danger:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body class="default">
+    <!-- 预加载动画 -->
+    <div class="preloading">
+        <div class="wrap-preload">
+            <div class="cssload-loader"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-header">
+        <div class="container-fluid">
+            <div class="logo">"黑悟空"主题数字文旅平台</div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div id="app" class="reservation-container">
+        <h2 class="page-title" style="font-weight: bold; color:#df9403">我的预约记录</h2>
+        
+        <!-- Loading State -->
+        <div v-if="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> 加载中...
+        </div>
+
+        <!-- Error State -->
+        <div v-if="error" class="error-message">
+            {{ error }}
+        </div>
+
+        <!-- Data Table -->
+        <div v-if="!loading && !error" class="reservation-table">
+            <!-- 桌面端表格视图 -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>标题</th>
+                        <th>预约类型</th>
+                        <th>预约状态</th>
+                        <th>日期</th>
+                        <th>时间</th>
+                        <th>场次</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in reservations" :key="item.id">
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.resType }}</td>
+                        <td :class="item.vldStat === '1' ? 'valid' : 'invalid'">
+                            {{ item.vldStat === '1' ? '有效' : '无效' }}
+                        </td>
+                        <td>{{ item.resDate }}</td>
+                        <td>{{ item.resTime }}</td>
+                        <td>{{ item.resSession }}</td>
+                        <td>
+                            <button v-if="item.vldStat === '1'" 
+                                    @click="handleReschedule(item)"
+                                    class="theme-button">
+                                取消并重新预约
+                            </button>
+                            <button @click="handleDelete(item.id)"
+                                    class="theme-button danger">
+                                删除
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 移动端卡片视图 -->
+            <div v-for="item in reservations" :key="item.id" class="mobile-card">
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">标题</span>
+                    <span class="mobile-card-value">{{ item.title }}</span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">预约类型</span>
+                    <span class="mobile-card-value">{{ item.resType }}</span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">预约状态</span>
+                    <span class="mobile-card-value" :class="item.vldStat === '1' ? 'valid' : 'invalid'">
+                        {{ item.vldStat === '1' ? '有效' : '无效' }}
+                    </span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">日期</span>
+                    <span class="mobile-card-value">{{ item.resDate }}</span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">时间</span>
+                    <span class="mobile-card-value">{{ item.resTime }}</span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">场次</span>
+                    <span class="mobile-card-value">{{ item.resSession }}</span>
+                </div>
+                <div class="mobile-card-actions">
+                    <button v-if="item.vldStat === '1'" 
+                            @click="handleReschedule(item)"
+                            class="theme-button">
+                        取消并重新预约
+                    </button>
+                    <button @click="handleDelete(item.id)"
+                            class="theme-button danger">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-panel">
+            <div class="bp-col">
+                <a href="index.html">
+                    <div class="bp-icon"><img src="img/iphome.png" alt="icon"></div>
+                    <div class="bp-text">首页</div>
+                </a>
+            </div>
+            <div class="bp-col">
+                <a href="col-list.html">
+                    <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+                    <div class="bp-text">藏品</div>
+                </a>
+            </div>
+            <div class="bp-col">
+                <a href="ReserveDetail.html">
+                    <div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+                    <div class="selected-bottom-text">我的预约</div>
+                </a>
+            </div>
+            <div class="bp-col">
+                <a href="setting.html">
+                    <div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+                    <div class="bp-text">个人中心</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                loading: true,
+                error: null,
+                reservations: [],
+                queryInfo: {
+                    name: '',
+                    pagenum: 1,
+                    pagesize: 800
+                }
+            },
+            created() {
+                this.checkLoginAndLoadData();
+            },
+            methods: {
+                async checkLoginAndLoadData() {
+                    try {
+                        const token = sessionStorage.getItem('token');
+                        if (!token) {
+                            throw new Error('未登录');
+                        }
+
+                        const response = await get('/user/me');
+                        if (response.code === 200 && response.data && response.data.id) {
+                            this.queryInfo.userId = response.data.id;
+                            await this.fetchReservations();
+                        } else {
+                            throw new Error('未获取到用户信息');
+                        }
+                    } catch (err) {
+                        console.error('获取用户信息失败:', err);
+                        window.location.href = 'login.html';
+                    } finally {
+                        // 隐藏预加载动画
+                        document.querySelector('.preloading').style.display = 'none';
+                    }
+                },
+
+                async fetchReservations() {
+                    try {
+                        this.loading = true;
+                        this.error = null;
+                        const response = await post('/reserveDetail/listDetailReserve', this.queryInfo);
+                        if (response.code === 200) {
+                            this.reservations = response.data.list;
+                        } else {
+                            throw new Error(response.msg || '获取预约列表失败');
+                        }
+                    } catch (err) {
+                        this.error = '获取预约列表失败，请稍后重试';
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async handleReschedule(item) {
+                    if (!confirm('确定要取消当前预约并重新预约吗？')) {
+                        return;
+                    }
+                    
+                    try {
+                        const response = await post('/reserveDetail/editDetail', {
+                            ...item,
+                            vldStat: '0'
+                        });
+                        
+                        if (response.code === 200) {
+                            alert('取消成功，即将跳转到预约页面');
+                            window.location.href = 'index.html';
+                        } else {
+                            throw new Error(response.msg || '操作失败');
+                        }
+                    } catch (err) {
+                        alert('操作失败：' + (err.message || '未知错误'));
+                    }
+                },
+
+                async handleDelete(id) {
+                    if (!confirm('确定要删除这条预约记录吗？')) {
+                        return;
+                    }
+                    
+                    try {
+                        const response = await post('/reserveDetail/delDetail', { id });
+                        if (response.code === 200) {
+                            await this.fetchReservations();
+                            alert('删除成功');
+                        } else {
+                            throw new Error(response.msg || '删除失败');
+                        }
+                    } catch (err) {
+                        alert('删除失败：' + (err.message || '未知错误'));
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
