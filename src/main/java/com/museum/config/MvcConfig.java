@@ -1,5 +1,7 @@
 package com.museum.config;
 
+import com.museum.utils.LoginInterceptor;
+import com.museum.utils.RefreshTokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -45,7 +47,9 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/file/**",
                         "/dic/listDicByTyp",
                         "/userClient/**"
-                );
+                ).order(1);
+        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+                .addPathPatterns("/**").order(0);
     }
 
 

@@ -31,157 +31,178 @@
         <script src="./util/request.js"></script>
 	</head>
 <body class="default">
+	<div id="app">
 		<div class="preloading">
 			<div class="wrap-preload">
 				<div class="cssload-loader"></div>
 			</div>
 		</div>
-			<!-- Header  -->
-			<nav class="navbar navbar-expand-lg navbar-light bg-header">
-				<div class="container-fluid">
-					<div class="logo">“黑悟空”主题数字文旅平台</div>
-				</div>
-			</nav>
-			<!-- .Header  -->
-			<!-- Content  -->
-        <div id="content">
-            <div class="content-wrap page-news-list">
-                <div class="subsite-banner">
+		<!-- Header  -->
+		<nav class="navbar navbar-expand-lg navbar-light bg-header">
+			<div class="container-fluid">
+				<div class="logo">"黑悟空"主题数字文旅平台</div>
+			</div>
+		</nav>
+		<!-- .Header  -->
+		<!-- Content  -->
+		<div class="content">
+			<div class="content-wrap page-news-list">
+				<div class="subsite-banner">
 
-                    <img src="img/subtitle-collection.jpg">
-                </div>
-                <div class="subsite subsite-with-banner">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="subsite-heading">
-                                藏品列表
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="search-form search-content">
-                                <select class="custom-select mr-sm-2 with-icon" id="caravailable" v-model="queryInfo.cateId">
-                                    <option :value="item.dicValue" v-for="item in colTyps">{{item.dicValue}}</option>
-                                </select>
-                                <div class="search-wrapper ">
-                                    <input id="search" placeholder="请输入标题" v-model="queryInfo.name">
-                                    <button class="ssubmit" type="button" name="search_submit" @click="getColData()"><i class="fas fa-search"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row news-row" v-for="item in collectionData">
-                        <div class="col-md-12">
-                            <a :href="'collDetail.html?id='+ item.id">
-                                <div class="news-card">
-                                    <div class="nc-top">
-                                        <div class="nc-left">
-                                            <div class="ncl-image">
-                                                <img :src="'http://localhost:8090/api/file/getPic?name=' + item.colPic" alt="image">
-                                            </div>
-                                        </div>
-                                        <div class="nc-right">
-                                            <div class="ncr-row-a">
-                                                {{item.title}}
-                                            </div>
-                                            <div class="ncr-row-b">
-                                                <p v-html="item.desColl"></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-			<!-- .Content  -->
-			<!-- 底部面板  -->
-			<div class="bottom-panel">
-				<div class="bp-col">
-					<a href="index.html">
-						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
-						<div class="bp-text">首页</div>
-					</a>
+					<img src="img/subtitle-collection.jpg">
 				</div>
-                <div class="bp-col">
-                    <a href="col-list.html">
-                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
-                        <div class="selected-bottom-text">藏品</div>
-                    </a>
-                </div>
-				<div class="bp-col">
-					<a href="myReserveDetail.html">
-						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
-						<div class="bp-text">我的预约</div>
-					</a>
-				</div>
-				<div class="bp-col">
-					<a href="setting.html">
-						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
-						<div class="bp-text">个人中心</div>
-					</a>
+				<div class="subsite subsite-with-banner">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="subsite-heading">
+								藏品列表
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="search-form search-content">
+								<select class="custom-select mr-sm-2 with-icon" id="caravailable" v-model="queryInfo.cateId">
+									<option :value="item.dicValue" v-for="item in colTyps">{{item.dicValue}}</option>
+								</select>
+								<div class="search-wrapper ">
+									<input id="search" placeholder="请输入标题" v-model="queryInfo.name">
+									<button class="ssubmit" type="button" name="search_submit" @click="getColData()"><i class="fas fa-search"></i></button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row news-row" v-for="item in collectionData">
+						<div class="col-md-12">
+							<a :href="'collDetail.html?id='+ item.id">
+								<div class="news-card">
+									<div class="nc-top">
+										<div class="nc-left">
+											<div class="ncl-image">
+												<img :src="'http://localhost:8090/api/file/getPic?name=' + item.colPic" alt="image">
+											</div>
+										</div>
+										<div class="nc-right">
+											<div class="ncr-row-a">
+												{{item.title}}
+											</div>
+											<div class="ncr-row-b">
+												<p v-html="item.desColl"></p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</a>
+						</div>
+					</div>
 				</div>
 			</div>
-			<!-- .Bottom Panel  -->
-			<div class="overlay"></div>
-			<!-- Optional JavaScript -->
-			<!-- jQuery v3.4.1 -->
-			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
-			<!--  Bootstrap v4.3.1 JS -->
-			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
-			<!-- Magnific Popup core JS file -->
-			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
-			<!-- Slick JS -->
-			<script src="lib/slick/slick/slick.min.js"></script>
-			<!--  Custom JS -->
-			<script src="js/theme.js"></script>
-        <script>
-            const vm = new Vue({
-                el: '#content',
-                data: {
-                    colTyps : [],
-                    collectionData : [],
-                    queryInfo: {
-                        name: '',
-                        pagenum: 1,
-                        pagesize: 8,
-                        cateId: ''
-                    }
-                },
-                mounted() {
-                    const typ = getQueryString('type')
-                    this.queryInfo.cateId = typ
-                    this.getData()
-                    this.getColData()
-                    this.listDicByTyp()
-                },
-                methods: {
-                    getData() {
-                        post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
-                            this.colTyps = response.data;
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    listDicByTyp() {
-                        post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
-                            this.colTyps = response.data;
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    getColData() {
-                        post('/collect/getdata', this.queryInfo).then(response => {
-                            this.collectionData = response.data.list;
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                }
-            })
-        </script>
+		</div>
+		<!-- .Content  -->
+		<!-- 底部面板  -->
+		<div class="bottom-panel">
+			<div class="bp-col">
+				<a href="index.html">
+					<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+					<div class="bp-text">首页</div>
+				</a>
+			</div>
+			<div class="bp-col">
+				<a href="col-list.html">
+					<div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+					<div class="selected-bottom-text">藏品</div>
+				</a>
+			</div>
+			<div class="bp-col">
+				<a href="ReserveDetail.html">
+					<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+					<div class="bp-text">我的预约</div>
+				</a>
+			</div>
+			<div class="bp-col">
+				<a href="setting.html">
+					<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+					<div class="bp-text">个人中心</div>
+				</a>
+			</div>
+		</div>
+		<!-- .Bottom Panel  -->
+		<div class="overlay"></div>
+		<!-- Optional JavaScript -->
+		<!-- jQuery v3.4.1 -->
+		<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+		<!--  Bootstrap v4.3.1 JS -->
+		<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+		<!-- Magnific Popup core JS file -->
+		<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+		<!-- Slick JS -->
+		<script src="lib/slick/slick/slick.min.js"></script>
+		<!--  Custom JS -->
+		<script src="js/theme.js"></script>
+		<script>
+			const vm = new Vue({
+				el: '#app',
+				data: {
+					colTyps : [],
+					collectionData : [],
+					userInfo: null,
+					queryInfo: {
+						name: '',
+						pagenum: 1,
+						pagesize: 8,
+						cateId: ''
+					}
+				},
+				created() {
+					// 先检查用户状态
+					this.checkUserStatus();
+					console.log('Vue instance created');
+					const typ = getQueryString('type')
+					this.queryInfo.cateId = typ
+					this.getData()
+					this.getColData()
+					this.listDicByTyp()
+				},
+				methods: {
+					async checkUserStatus() {
+						try {
+							const token = sessionStorage.getItem('token');
+							console.log('当前token:', token);
+							if (token) {
+								const response = await get('/user/me');
+								if (response.code === 200 && response.data) {
+									this.userInfo = response.data;
+									console.log('用户信息获取成功:', this.userInfo);
+								}
+							}
+						} catch (err) {
+							console.error('获取用户信息失败:', err);
+						}
+					},
+					getData() {
+						post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
+							this.colTyps = response.data;
+						}).catch(err => {
+							console.log(err);
+						});
+					},
+					listDicByTyp() {
+						post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
+							this.colTyps = response.data;
+						}).catch(err => {
+							console.log(err);
+						});
+					},
+					getColData() {
+						post('/collect/getdata', this.queryInfo).then(response => {
+							this.collectionData = response.data.list;
+						}).catch(err => {
+							console.log(err);
+						});
+					},
+				}
+			})
+		</script>
+	</div>
 </body>
 </html>
