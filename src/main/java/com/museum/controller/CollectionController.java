@@ -1,6 +1,7 @@
 package com.museum.controller;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
 import com.museum.domain.dto.CollectionQuery;
@@ -9,6 +10,8 @@ import com.museum.domain.query.PageQuery;
 import com.museum.service.impl.CollectionService;
 import com.museum.service.impl.ReserveService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +29,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/collect")
 @RequiredArgsConstructor
+@Slf4j
 public class CollectionController {
 
     @Resource
@@ -45,10 +49,27 @@ public class CollectionController {
         return JsonResult.result(users);
     }
 
+    /**
+     * 获取单个藏品信息
+     * @param pageQuery
+     * @return
+     */
     @PostMapping("/getdata")
     public JsonResult getdata(@RequestBody CollectionQuery pageQuery) {
-        PageResult<MsCollection> users = collectionService.listMsCollection(pageQuery);
-        return JsonResult.result(users);
+        // 参数校验
+        if (pageQuery == null || pageQuery.getId()==null) {
+            return JsonResult.failResult("藏品ID不能为空");
+        }
+        try {
+            MsCollection msCollection = collectionService.getMsCollection(pageQuery);
+            if (msCollection == null) {
+                return JsonResult.failResult("藏品不存在");
+            }
+            return JsonResult.result(msCollection);
+        } catch (Exception e) {
+            log.error("获取藏品信息失败", e);
+            return JsonResult.failResult("获取藏品信息失败");
+        }
     }
     @PostMapping("/getdataTop")
     public JsonResult getdataTop(@RequestBody PageQuery pageQuery) {
@@ -58,12 +79,6 @@ public class CollectionController {
             menuNm = "热门藏品";
         }
         PageResult pageResult = null;
-//        switch (menuNm){
-//            case "热门藏品":
-//            case "藏品一览":
-//                pageResult = collectionService.listMsCollectionTop(pageQuery);
-//                break;
-//        }
         pageResult = collectionService.listMsCollectionTop(pageQuery);
         return JsonResult.result(pageResult);
     }

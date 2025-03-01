@@ -1,9 +1,5 @@
 package com.museum.service.impl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,18 +8,22 @@ import com.museum.domain.dto.CollectionQuery;
 import com.museum.domain.po.MsCollection;
 import com.museum.domain.query.PageQuery;
 import com.museum.mapper.CollectionMapper;
+import com.museum.utils.CacheClient;
 import com.museum.utils.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static com.museum.constants.Constant.CACHE_CATE_TTL;
-import static com.museum.constants.Constant.CATE_LIST;
+import static com.museum.constants.Constant.*;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -31,14 +31,23 @@ import static com.museum.constants.Constant.CATE_LIST;
  * </p>
  * @since 2023-22-29
  */
+@Slf4j
 @Service
+@Transactional
 public class CollectionService extends ServiceImpl<CollectionMapper, MsCollection> implements IService<MsCollection> {
     //TODO:更新数据库数据的操作，需要保持数据一致性
-    //TODO:缓存藏品信息，需结合布隆过滤器、逻辑过期、缓存空值去预防缓存击穿、缓存穿透
-    //TODO:先做一个细分的整体商户缓存
+    //TODO:缓存藏品信息，需结合布隆过滤器、逻辑过期、缓存空值去预防缓存击穿、缓存穿透(已完成
+
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private CacheClient cacheClient;
+    @Resource
+    private RedissonClient redissonClient;
+
+    // 创建线程池处理异步任务
+    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
 
     /**
      * 获取coll-list该页面下所有藏品
@@ -51,24 +60,77 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
         Page<MsCollection> page = lambdaQuery().orderByDesc(MsCollection::getCrtTm).page(pageQuery.toMpPage());
         return PageResult.of(page,page.getRecords());
     }
-    public PageResult<MsCollection> listMsCollection(CollectionQuery pageQuery) {
-        LambdaQueryChainWrapper<MsCollection> lambdaQueryChainWrapper = lambdaQuery().like(MsCollection::getTitle, pageQuery.getName());
-        if(null != pageQuery.getId()) {
-            lambdaQueryChainWrapper.eq(MsCollection::getId, pageQuery.getId());
-            MsCollection msCollection = getById(pageQuery.getId());
-            if(msCollection.getViewCnt() == null) {
-                msCollection.setViewCnt(1);
-            }else {
-                msCollection.setViewCnt(msCollection.getViewCnt() + 1);
+    
+
+    /**
+     * 获取单个藏品
+     * @param pageQuery
+     * @return
+     */
+    public MsCollection getMsCollection(CollectionQuery pageQuery) {
+        //判断是否为空
+        Integer collectId = pageQuery.getId();
+        if(collectId == null) {
+            return null;
+        }
+
+
+        // 获取分布式锁
+        String lockKey = "Update_Cache_DB";
+        RLock lock = redissonClient.getLock(lockKey);
+
+        MsCollection msCollection = cacheClient
+                .queryWithBloomAndLogical(CACHE_COLLECT, LOCK_COLLECT_KEY, BLOOM_COLLECT,
+                        collectId, MsCollection.class,
+                        id -> getById(id), CACHE_COLLECT_TTL, TimeUnit.HOURS);
+        
+        if(msCollection == null) {
+            return null;
+        }
+        /*
+        //同步策略
+        // 更新点击数并同步缓存
+        msCollection.setViewCnt(msCollection.getViewCnt() + 1);
+        updateById(msCollection);
+
+        // 更新缓存中的数据
+        cacheClient.setWithLogicalExpire(
+                CACHE_COLLECT + collectionId,
+                msCollection,
+                CACHE_COLLECT_TTL,
+                TimeUnit.HOURS
+        );*/
+        // 异步更新点击数和缓存
+        CACHE_REBUILD_EXECUTOR.submit(() -> {
+            try {
+                // 获取锁
+                if (lock.tryLock(10, TimeUnit.SECONDS)) {
+                    try {
+                        // 更新点击数
+                        msCollection.setViewCnt(msCollection.getViewCnt() + 1);
+                        updateById(msCollection);
+                        
+                        // 更新缓存
+                        cacheClient.setWithLogicalExpire(
+                            CACHE_COLLECT + collectId,
+                            msCollection,
+                                CACHE_COLLECT_TTL,
+                            TimeUnit.HOURS
+                        );
+                        log.info("异步更新id{}实体点击量和缓存: ", collectId);
+                    } finally {
+                        // 释放锁
+                        lock.unlock();
+                    }
+                }
+            } catch (Exception e) {
+                log.error("异步更新id{}点击量和缓存失败: ", collectId, e);
             }
-            updateById(msCollection);
-        }
-        if(null != pageQuery.getCateId()) {
-            lambdaQueryChainWrapper.eq(MsCollection::getCateId, pageQuery.getCateId());
-        }
-        Page<MsCollection> page = lambdaQueryChainWrapper.page(pageQuery.toMpPage());
-        return PageResult.of(page, page.getRecords());
+        });
+
+        return msCollection;
     }
+
     /**
      * 获取展品列表
      * @return
@@ -85,13 +147,25 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
         return null;
     }
 
+
+    //以上为客户端相关方法
     /**
      * 编辑展品
      * @param collection
      */
     public void editColl(MsCollection collection) {
-        collection.setCrtTm(StringUtils.getNowDateTIme());
-        saveOrUpdate(collection);
+        try {
+            Boolean success = updateCacheDB(collection);
+            if(success)
+            {
+                log.info("更新id:{}藏品信息成功！",collection.getId());
+            }else
+            {
+                log.info("更新id:{}藏品信息失败！",collection.getId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     /**
      * 添加展品
@@ -113,8 +187,32 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
             throw new Exception("找不到原始记录，删除失败！");
         }
         removeById(id);
+        //操作缓存
+        stringRedisTemplate.delete(CACHE_COLLECT+id);
     }
 
+    /**
+     * 基于缓存的更新策略
+     * @param collection
+     * @return
+     */
+    public Boolean updateCacheDB(MsCollection collection)
+    {
+       //更新数据库，删除缓存
+        //顺序为1.先操作数据库2.再删除缓存
+        //检查数据库里有没有这个藏品
+        MsCollection clt = getById(collection.getId());
+        if(clt==null)
+        {
+            return false;
+        }
+        //如果有，先操作数据库
+        clt.setCrtTm(StringUtils.getNowDateTIme());
+        saveOrUpdate(clt);
+        //删除缓存
+        stringRedisTemplate.delete(CACHE_COLLECT+collection.getId());
+        return true;
+    }
 
 
 }

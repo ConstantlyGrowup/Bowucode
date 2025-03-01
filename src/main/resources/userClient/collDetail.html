@@ -217,6 +217,7 @@
                     collectionData : {},
                     reserve : [],
                     queryInfo: {
+                        cateId:'',
                         name: '',
                         pagenum: 1,
                         pagesize: 8
@@ -228,14 +229,15 @@
                     popHtml: ''
                 },
                 mounted() {
-                    const id = getQueryString('id')
-                    const type = getQueryString('type')
-                    console.log('--type' + type)
-                    this.picBaseUrl = picBaseUrl
+                    // 从URL获取id参数
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const id = urlParams.get('id');
                     if(id) {
-                        this.queryInfo.id = id
+                        this.queryInfo.id = parseInt(id);
+                        this.loadData();
+                    } else {
+                        console.error("没有提供藏品ID参数");
                     }
-                    this.loadData()
                 },
                 methods: {
                     loadData(){
@@ -249,10 +251,15 @@
                         this.popHtml = item.resDes
                     },
                     getColData() {
-                        post('/collect/getdata', this.queryInfo).then(response => {
-                            this.collectionData = response.data.list[0];
+                        post('/collect/getdata', {id: this.queryInfo.id}).then(response => {
+                            console.log("API返回数据:", response); // 添加调试日志
+                            if(response.code === 200) {
+                                this.collectionData = response.data;
+                            } else {
+                                console.error("获取藏品数据失败:", response.msg);
+                            }
                         }).catch(err => {
-                            console.log(err);
+                            console.error("API请求异常:", err);
                         });
                     },
                     getRowInfo(item) {
