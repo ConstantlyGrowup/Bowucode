@@ -11,6 +11,7 @@ import com.museum.mapper.CollectionMapper;
 import com.museum.utils.CacheClient;
 import com.museum.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBloomFilter;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CollectionService extends ServiceImpl<CollectionMapper, MsCollection> implements IService<MsCollection> {
-    //TODO:更新数据库数据的操作，需要保持数据一致性
-    //TODO:缓存藏品信息，需结合布隆过滤器、逻辑过期、缓存空值去预防缓存击穿、缓存穿透(已完成
-
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -45,6 +43,8 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
     private CacheClient cacheClient;
     @Resource
     private RedissonClient redissonClient;
+
+
 
     // 创建线程池处理异步任务
     private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
@@ -174,6 +174,9 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
     public void addColl(MsCollection collection) {
         collection.setCrtTm(StringUtils.getNowDateTIme());
         save(collection);
+        RBloomFilter<Object> bloomFilter = redissonClient.getBloomFilter(BLOOM_COLLECT);
+        bloomFilter.add(collection.getId());
+        log.info("id:{} 已经被加入到布隆过滤器",collection.getId());
     }
 
     /**

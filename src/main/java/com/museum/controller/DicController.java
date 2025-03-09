@@ -34,10 +34,10 @@ public class DicController {
         return JsonResult.result(dicService.listDicTyp());
     }
 
-    @PostMapping("/listDicByTyp")
-    public JsonResult listDicByTyp(@RequestBody MsDic dic) {
+    @PostMapping("/listColType")
+    public JsonResult listColType(@RequestBody MsDic dic) {
         try {
-            List<MsDic> dics = dicService.listDicByTyp(dic.getDicTyp());
+            List<MsDic> dics = dicService.listColType(dic.getDicTyp());
             return JsonResult.result(dics);
         }catch (Exception e){
             return JsonResult.failResult(e.getMessage());

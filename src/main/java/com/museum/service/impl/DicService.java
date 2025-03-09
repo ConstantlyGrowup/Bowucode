@@ -37,10 +37,10 @@ public class DicService extends ServiceImpl<DicMapper, MsDic> implements IServic
     }
 
     /**
-     * 获取字典值。根据类型
+     * 获取藏品的所有类型
      * @return
      */
-    public List<MsDic> listDicByTyp(String dicTyp) {
+    public List<MsDic> listColType(String dicTyp) {
         QueryWrapper<MsDic> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(MsDic::getDicTyp, dicTyp);
         return list(queryWrapper);
@@ -50,7 +50,7 @@ public class DicService extends ServiceImpl<DicMapper, MsDic> implements IServic
      * @return
      */
     public List<String> listDicValueByTyp(String dicTyp) {
-        List<MsDic> datas = listDicByTyp(dicTyp);
+        List<MsDic> datas = listColType(dicTyp);
         List<String> values = new ArrayList<>(datas.size());
         for(MsDic msDic: datas) {
             values.add(msDic.getDicValue());

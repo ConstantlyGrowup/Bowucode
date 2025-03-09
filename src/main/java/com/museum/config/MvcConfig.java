@@ -48,7 +48,7 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/feedBack/listFeedBackByUser",
                         "/ai/**",
                         "/file/**",
-                        "/dic/listDicByTyp",
+                        "/dic/listColType",
                         "/userClient/**"
                 ).order(1);
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
