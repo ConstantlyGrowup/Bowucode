@@ -49,10 +49,23 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
     public PageResult<MsReserve> listMsReserve(ReserveQuery pageQuery) {
         // 构建查询条件
         LambdaQueryChainWrapper<MsReserve> queryChain = lambdaQuery();
+        Integer cateId = pageQuery.getCateId();
         
         // 如果有名称搜索条件，添加模糊查询
         if (StringUtils.isNotBlank(pageQuery.getName())) {
             queryChain.like(MsReserve::getTitle, pageQuery.getName());
+        }
+        
+        // 如果有藏品ID搜索条件，先查询关联表获取相关的预约ID列表
+        List<Integer> reserveIds = null;
+        if (cateId != null) {
+            reserveIds = reserveCollectionMapper.findReserveIdsByCateId(cateId);
+            if (reserveIds.isEmpty()) {
+                // 如果没有找到相关预约，直接返回空结果
+                return PageResult.of(new Page<>(), new ArrayList<>());
+            }
+            // 使用查询到的预约ID列表过滤
+            queryChain.in(MsReserve::getId, reserveIds);
         }
         
         // 执行分页查询
@@ -132,24 +145,6 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         saveOrUpdate(msReserve);
     }
 
-//    /**
-//     * 添加预约信息
-//     * @param msReserve
-//     */
-//    public void addMsReserve(MsReserve msReserve) {
-//        Integer[] cateIds = msReserve.getCateIds();
-//        for (Integer cateId:cateIds) {
-//            msReserve.setCateId(cateId);
-//            MsCollection msCollection =  collectionMapper.selectById(cateId);
-//            if(null != msCollection) {
-//                msReserve.setCateName(msCollection.getTitle());
-//            }
-//            msReserve.setResdSum(0);
-//            msReserve.setCrtTm(StringUtils.getNowDateTIme());
-//            save(msReserve);
-//        }
-//    }
-
 
     /**
      * 添加预约信息
@@ -166,6 +161,9 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         // 设置预约信息的其他属性
         msReserve.setResdSum(0);
         msReserve.setCrtTm(StringUtils.getNowDateTIme());
+        //拼接展览标题
+        String finalTitle = msReserve.getTitle() + "/" + msReserve.getResSession() + "/" + msReserve.getResTime();
+        msReserve.setTitle(finalTitle);
         save(msReserve);
 
         // 关联多个藏品

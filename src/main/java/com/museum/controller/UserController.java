@@ -38,23 +38,23 @@ public class UserController {
     @Resource
     StringRedisTemplate stringRedisTemplate;
 
-    @PostMapping("/getdata")
-    public JsonResult getdata(@RequestBody PageQuery pageQuery) {
-        PageResult<MsUser> users = userService.listUserPage(pageQuery);
-        return JsonResult.result(users);
-    }
-    @PostMapping("/deluser")
-    public JsonResult deluser(@RequestBody MsUser msUser) {
-        try {
-            if(msUser.getId() == null) {
-                throw new Exception("ID不允许为空！！！");
-            }
-            userService.deluser(msUser.getId());
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
+//    @PostMapping("/getdata")
+//    public JsonResult getdata(@RequestBody PageQuery pageQuery) {
+//        PageResult<MsUser> users = userService.listUserPage(pageQuery);
+//        return JsonResult.result(users);
+//    }
+//    @PostMapping("/deluser")
+//    public JsonResult deluser(@RequestBody MsUser msUser) {
+//        try {
+//            if(msUser.getId() == null) {
+//                throw new Exception("ID不允许为空！！！");
+//            }
+//            userService.deluser(msUser.getId());
+//            return JsonResult.result("成功！");
+//        }catch (Exception e){
+//            return JsonResult.failResult(e.getMessage());
+//        }
+//    }
 
     //以下为客户端的接口
     @PostMapping("/login")

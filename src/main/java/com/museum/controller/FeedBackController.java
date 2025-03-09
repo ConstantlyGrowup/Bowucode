@@ -34,15 +34,6 @@ public class FeedBackController {
         return JsonResult.result(feedBackService.listFeedBackByUser(pageQuery));
     }
 
-    @PostMapping("/listAllFeedBack")
-    public JsonResult listAllFeedBack(@RequestBody FeedBackQuery pageQuery) {
-        try {
-            PageResult<FeedBack> data = feedBackService.listAllFeedBack(pageQuery);
-            return JsonResult.result(data);
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 
     @PostMapping("/delFeedBack")
     public JsonResult delDic(@RequestBody FeedBack feedBack) {
@@ -63,13 +54,4 @@ public class FeedBackController {
         }
     }
 
-    @PostMapping("/editFeedBack")
-    public JsonResult editFeedBack(@RequestBody FeedBack feedBack) {
-        try {
-            feedBackService.editFeedBack(feedBack);
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 }

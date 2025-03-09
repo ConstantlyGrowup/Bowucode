@@ -42,33 +42,5 @@ public class AnnouncementController {
         }
     }
 
-    @PostMapping("/addMsAnnouncement")
-    public JsonResult delDic(@RequestBody MsAnnouncement msAnnouncement) {
-        try {
-            announcementService.addMsAnnouncement(msAnnouncement);
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 
-    @PostMapping("/editMsAnnouncement")
-    public JsonResult editMsAnnouncement(@RequestBody MsAnnouncement msAnnouncement) {
-        try {
-            announcementService.editMsAnnouncement(msAnnouncement);
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
-
-    @PostMapping("/delMsAnnouncement")
-    public JsonResult delMsAnnouncement(@RequestBody MsAnnouncement msAnnouncement) {
-        try {
-            announcementService.delMsAnnouncement(msAnnouncement.getId());
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 }

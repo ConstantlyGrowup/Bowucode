@@ -46,25 +46,5 @@ public class ReserveDetailController {
         }
     }
 
-    @PostMapping("/editDetail")
-    public JsonResult editDetail(@RequestBody MsReserveDetail detial) {
-        try {
-            reserveDetailService.editDetail(detial);
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            e.printStackTrace();
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 
-    @PostMapping("/delDetail")
-    public JsonResult delDetail(@RequestBody MsReserveDetail msReserve) {
-        try {
-            reserveDetailService.delDetail(msReserve.getId());
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            e.printStackTrace();
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 }

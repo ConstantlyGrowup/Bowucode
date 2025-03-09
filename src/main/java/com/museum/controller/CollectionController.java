@@ -35,8 +35,6 @@ public class CollectionController {
     @Resource
     CollectionService collectionService;
 
-    @Resource
-    ReserveService reserveService;
 
     /**
      *用于获取页面所有藏品
@@ -83,35 +81,5 @@ public class CollectionController {
         return JsonResult.result(pageResult);
     }
 
-    @PostMapping("/addColl")
-    public JsonResult register(@RequestBody MsCollection msCollection) {
-        try {
-            collectionService.addColl(msCollection);
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 
-    @PostMapping("/editCollInfo")
-    public JsonResult editUserInfo(@RequestBody MsCollection msCollection) {
-        try {
-            collectionService.editColl(msCollection);
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
-    @PostMapping("/delColl")
-    public JsonResult delColl(@RequestBody MsCollection msCollection) {
-        try {
-            if(msCollection.getId() == null) {
-                throw new Exception("ID不允许为空！！！");
-            }
-            collectionService.delColl(msCollection.getId());
-            return JsonResult.result("成功！");
-        }catch (Exception e){
-            return JsonResult.failResult(e.getMessage());
-        }
-    }
 }

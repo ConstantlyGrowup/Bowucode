@@ -129,4 +129,27 @@ public class UserService extends ServiceImpl<MsUserMapper, MsUser> implements IS
         removeById(id);
     }
 
+    /**
+     * 更新用户信息
+     * @param user 用户信息对象
+     * @throws Exception 如果更新失败
+     */
+    public void updateUser(MsUser user) throws Exception {
+        if(user.getId() == null) {
+            throw new Exception("用户ID不能为空");
+        }
+        
+        // 检查用户是否存在
+        MsUser existingUser = getById(user.getId());
+        if(existingUser == null) {
+            throw new Exception("找不到指定ID的用户");
+        }
+        
+        // 更新用户信息
+        boolean success = updateById(user);
+        if(!success) {
+            throw new Exception("更新用户信息失败");
+        }
+    }
+
 }
