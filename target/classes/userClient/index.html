@@ -372,7 +372,7 @@
                         this.popHtml = item.resDes
                     },
                     getData() {
-                        post('/dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
+                        post('/dic/listColType', {dicTyp: '藏品分类'}).then(response => {
                             this.colTyps = response.data;
                         }).catch(err => {
                             console.log(err);
@@ -406,25 +406,29 @@
                         window.location.href='col-list.html?type='+ value
                     },
                     sendFeedBack(value) {
-                        const userStr = sessionStorage.getItem('user')
-                        if(userStr === null || userStr === '') {
+                        const token = sessionStorage.getItem('token')
+                        if(token === null || token === '') {
                             window.location.href='login.html'
                             return
                         }
-                        const user = JSON.parse(userStr)
+                        // 从 userInf 中获取用户信息
+                        if (!this.userInf || !this.userInf.id) {
+                            alert('获取用户信息失败')
+                            return
+                        }
                         if(this.feedContext === '') {
                             alert('请输入留言信息')
                             return;
                         }
-                        console.log(user)
                         const info = {
-                            userId: user.id,
+                            userId: this.userInf.id,
                             cateId: '',
                             feedContent: this.feedContext,
-                            userName: user.username
+                            userName: this.userInf.username
                         }
                         post('/feedBack/addFeedBack', info).then(response => {
                             alert('成功！')
+                            this.feedContext = ''
                         }).catch(err => {
                             console.log(err);
                         });

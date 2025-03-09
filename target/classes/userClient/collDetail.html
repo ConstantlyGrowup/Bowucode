@@ -144,6 +144,13 @@
                                             <div class="cmc-heading">
                                                 <a class="float-left cm-name" href="javascript:void(0)"><strong>{{item.userName}}</strong></a>
                                                 <p class="float-right cm-hour">{{item.fedDateTime}}</p>
+                                                <a v-if="userInf.id && userInf.id === item.userId" 
+                                                   href="javascript:void(0)" 
+                                                   class="float-right" 
+                                                   style="margin-right: 10px; color: #ff5252;"
+                                                   @click="deleteFeedBack(item)">
+                                                    <i class="fas fa-trash-alt"></i> 删除
+                                                </a>
                                                 <div class="clear"></div>
                                             </div>
                                             <div class="cm-content">
@@ -226,7 +233,8 @@
                     id: '',
                     feedContext: '',
                     showReservePop: false,
-                    popHtml: ''
+                    popHtml: '',
+                    userInf: {}, // 用户信息从接口获取
                 },
                 mounted() {
                     // 从URL获取id参数
@@ -235,6 +243,7 @@
                     if(id) {
                         this.queryInfo.id = parseInt(id);
                         this.loadData();
+                        this.fetchUserMe() // 获取用户信息
                     } else {
                         console.error("没有提供藏品ID参数");
                     }
@@ -244,6 +253,46 @@
                         this.getColData()
                         this.listMsReserve()
                         this.listFeedBackByUser()
+                    },
+                    fetchUserMe() {
+                        try {
+                            // 从 sessionStorage 中读取 token
+                            const token = sessionStorage.getItem('token');
+                            console.log('当前token为： ', token)
+                            // 如果 token 为空，表示当前为游客模式，不调用 me 接口
+                            if (!token) {
+                                console.log('未检测到 token，当前为游客模式');
+                                this.userInf = {}; // 确保用户信息为空对象
+                                return;
+                            }
+
+                            // 调用 /api/user/me 接口获取用户信息
+                            get('/user/me').then(response => {
+                                // 检查接口返回的状态码
+                                if (response.code === 200) {
+                                    if (response.data) {
+                                        // 有用户数据，表示已登录
+                                        this.userInf = response.data;
+                                        console.log('已获取用户信息:', this.userInf);
+                                    } else {
+                                        // 数据为空，表示 token 可能无效或过期
+                                        console.log('未获取到用户登录信息，当前为游客模式');
+                                        this.userInf = {}; // 清空用户信息
+                                    }
+                                } else {
+                                    // 请求成功但返回了错误码
+                                    console.error('请求失败:', response.msg);
+                                    this.userInf = {}; // 清空用户信息
+                                }
+                            }).catch(error => {
+                                // 网络错误或后端异常
+                                console.error('获取用户信息时发生异常:', error);
+                                this.userInf = {}; // 清空用户信息
+                            });
+                        } catch (error) {
+                            console.error('fetchUserMe方法执行出错:', error);
+                            this.userInf = {}; // 确保用户信息为空对象
+                        }
                     },
                     showPop(item) {
                         console.log(item)
@@ -350,24 +399,30 @@
                         });
                     },
                     addDetail(val) {
-                        console.log(val.resId)
-                        const userStr = sessionStorage.getItem('user')
-                        if(userStr==null || userStr === '') {
+                        const token = sessionStorage.getItem('token')
+                        if(token === null || token === '') {
                             window.location.href='login.html'
                             return
                         }
-                        const user = JSON.parse(userStr)
+                        
+                        // 从 userInf 中获取用户信息
+                        if (!this.userInf || !this.userInf.id) {
+                            alert('获取用户信息失败')
+                            return
+                        }
+
                         const detail = {
-                            userId: user.id,
-                            userName: user.username,
+                            userId: this.userInf.id,
+                            userName: this.userInf.username,
                             resId: val.id,
                             cateId: this.queryInfo.id,
-                            cateTitle:  this.collectionData.title,
-                            resType:  val.resType,
-                            resDate:  val.resDate,
-                            resTime:  val.resTime,
-                            resSession:  val.resSession
+                            cateTitle: this.collectionData.title,
+                            resType: val.resType,
+                            resDate: val.resDate,
+                            resTime: val.resTime,
+                            resSession: val.resSession
                         }
+                        
                         post('/reserveDetail/addDetail', detail).then(response => {
                             if(response.code === 200) {
                                 alert('成功')
@@ -380,28 +435,64 @@
                         });
                     },
                     sendFeedBack(value) {
-                        const userStr = sessionStorage.getItem('user')
-                        if(userStr === null || userStr === '') {
+                        const token = sessionStorage.getItem('token')
+                        if(token === null || token === '') {
                             window.location.href='login.html'
                             return
                         }
-                        const user = JSON.parse(userStr)
+
+                        // 从 userInf 中获取用户信息
+                        if (!this.userInf || !this.userInf.id) {
+                            alert('获取用户信息失败')
+                            return
+                        }
+
                         if(this.feedContext === '') {
                             alert('请输入留言信息')
                             return;
                         }
-                        console.log(this.feedContext)
+
                         const info = {
-                            userId: user.id,
+                            userId: this.userInf.id,
                             cateId: this.queryInfo.id,
                             feedContent: this.feedContext,
-                            userName: user.username
+                            userName: this.userInf.username
                         }
+                        
                         post('/feedBack/addFeedBack', info).then(response => {
                             this.feedContext = ''
                             this.loadData()
                         }).catch(err => {
                             console.log(err);
+                        });
+                    },
+                    deleteFeedBack(item) {
+                        if (!confirm('确定要删除这条评论吗？')) {
+                            return;
+                        }
+                        
+                        const token = sessionStorage.getItem('token');
+                        if(token === null || token === '') {
+                            alert('请先登录');
+                            return;
+                        }
+                        
+                        // 确保是用户自己的评论
+                        if (this.userInf.id !== item.userId) {
+                            alert('您只能删除自己的评论');
+                            return;
+                        }
+                        
+                        post('/feedBack/delFeedBack', {id: item.id}).then(response => {
+                            if(response.code === 200) {
+                                alert('删除成功');
+                                this.listFeedBackByUser(); // 重新加载评论列表
+                            } else {
+                                alert(response.msg || '删除失败');
+                            }
+                        }).catch(err => {
+                            console.error('删除评论失败:', err);
+                            alert('删除评论时发生错误');
                         });
                     }
                 }
