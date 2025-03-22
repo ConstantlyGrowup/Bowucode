@@ -22,4 +22,5 @@ public interface ReserveMapper extends BaseMapper<MsReserve> {
             "LEFT JOIN ms_collection c ON rc.cate_id = c.id " +
             "WHERE c.title LIKE CONCAT('%', #{collectionName}, '%')")
     List<MsReserve> findByCollectionName(String collectionName);
+
 }

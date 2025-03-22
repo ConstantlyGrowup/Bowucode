@@ -36,10 +36,10 @@ public class ReserveDetailController {
     }
 
     @PostMapping("/addDetail")
-    public JsonResult addDetail(@RequestBody MsReserveDetail detial) {
+    public JsonResult addDetail(@RequestBody MsReserveDetail detail) {
         try {
-            reserveDetailService.addDetail(detial);
-            return JsonResult.result("成功！");
+            return reserveDetailService.addDetail(detail);
+           // return JsonResult.result("成功！");
         }catch (Exception e){
             e.printStackTrace();
             return JsonResult.failResult(e.getMessage());

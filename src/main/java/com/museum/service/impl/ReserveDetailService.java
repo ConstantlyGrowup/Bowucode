@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.museum.config.ExcepUtil;
+import com.museum.config.JsonResult;
 import com.museum.config.PageResult;
 import com.museum.domain.dto.ReserveQuery;
 import com.museum.domain.po.MsReserve;
@@ -17,6 +18,9 @@ import com.museum.mapper.ReserveMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -83,53 +87,51 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
         saveOrUpdate(detail);
         
         // 更新展览的预约人数
-        updateMsReserveResdSum(detail);
+        updateReserveResdSum(detail.getResId());
     }
 
     /**
      * 添加预约详情
-     *   private Integer id;
-     *     private String userId; // 用户ID
-     *     private String userName; // 用户名
-     *     private String resId; // 预约记录ID
-     *     private String cateId; // 展品ID
-     *     private String cateTitle; // 展品名称
-     *     private String resType; // 预约类型
-     *     private String resDate; // 日期
-     *     private String resTime; // 时间段
-     *     private String vldStat; // 是否有效
-     *     private String resSession; //场次
-     * @param detial
      */
-    public void addDetail(MsReserveDetail detial) throws Exception {
+    public JsonResult addDetail(MsReserveDetail detail) throws Exception {
+
+        //1.检查日期，预约是否过期
+        //当天日期
+        LocalDate now=LocalDate.now();
+        //日期转换
+        DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate resDate = LocalDate.parse(detail.getResDate(), formatter);
+        //如果已经过期
+        if(resDate.isBefore(now))
+        {
+           return JsonResult.failResult("预约已经过期！");
+        }
+        //2.检查库存余量是否充足
+        MsReserve reserve = reserveMapper.selectById(detail.getResId());//得到单个展览
+        Integer currentSum = reserve.getResdSum();
+        if(currentSum+1>reserve.getResSum())//如果加上当前预约数大于预约总数
+        {
+            return JsonResult.failResult("预约超额！");
+        }
+        //3.检查是否先前有过预约
         QueryWrapper<MsReserveDetail> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(MsReserveDetail::getUserId, detial.getUserId())
-                .eq(MsReserveDetail::getResId, detial.getResId())
+                .eq(MsReserveDetail::getUserId, detail.getUserId())
+                .eq(MsReserveDetail::getResId, detail.getResId())
                 .eq(MsReserveDetail::getVldStat, "1");
-        
+
         if (count(queryWrapper) > 0) {
-            throw new IllegalArgumentException("已经预约过该展览，不能重复预约");
+            return JsonResult.failResult("已经预约过该展览，不能重复预约");
         }
-        
-        detial.setVldStat("1");
-        save(detial);
-        
-        updateReserveResdSum(detial.getResId());
+        //4.条件均满足，预约人数+1
+        detail.setVldStat("1");
+        reserve.setResdSum(currentSum+1);
+        save(detail);
+        reserveMapper.updateById(reserve);
+        return JsonResult.result(detail.getId());
     }
 
-    /**
-     * 更新实际预约人数
-     */
-    public void updateMsReserveResdSum(MsReserveDetail detial) {
-        // 更新实际预约人数
-        MsReserve msReserve = reserveMapper.selectById(detial.getResId());
-        QueryWrapper<MsReserveDetail> detialQueryWrapper = new QueryWrapper<>();
-        detialQueryWrapper.lambda().eq(MsReserveDetail::getResId, detial.getResId()).eq(MsReserveDetail::getVldStat, "1");
-        List<MsReserveDetail> reserveDetials = baseMapper.selectList(detialQueryWrapper);
-        msReserve.setResdSum(reserveDetials.size());
-        reserveMapper.updateById(msReserve);
-    }
+
 
     /**
      * 删除预约详情
@@ -142,7 +144,7 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
             throw new Exception("找不到原始记录，删除失败！");
         }
         removeById(id);
-        updateMsReserveResdSum(detial);
+        updateReserveResdSum(detial.getResId());
     }
 
     /**

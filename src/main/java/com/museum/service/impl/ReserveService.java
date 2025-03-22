@@ -94,9 +94,8 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
      */
     public PageResult<MsReserve> listMsReserveClient(ReserveQuery pageQuery) {
         LocalDate today = LocalDate.now();//今日的日期
-        LocalDate nextMonth = LocalDate.now().plusMonths(1);//下个月的日期
         String todayString = today.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String nextMonthString = nextMonth.format(DateTimeFormatter.ISO_LOCAL_DATE);
+
         
         // 如果是按藏品ID查询，先获取关联的展览ID
         List<Integer> reserveIds = null;
@@ -110,8 +109,7 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         QueryWrapper<MsReserve> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
                 .in(reserveIds != null, MsReserve::getId, reserveIds)
-                .ge(MsReserve::getResDate, todayString)
-                .le(MsReserve::getResDate, nextMonthString);
+                .ge(MsReserve::getResDate, todayString);
 
         Page<MsReserve> page = this.page(pageQuery.toMpPage(), queryWrapper);
         

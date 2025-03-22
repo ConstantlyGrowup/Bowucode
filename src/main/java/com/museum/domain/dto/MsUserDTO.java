@@ -6,5 +6,6 @@ import lombok.Data;
 public class MsUserDTO {
     private Integer id;
     private String username;
+    private String nickname;
     private Integer state;
 }
