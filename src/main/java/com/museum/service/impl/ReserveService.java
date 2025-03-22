@@ -69,7 +69,7 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         }
         
         // 执行分页查询
-        Page<MsReserve> page = queryChain.page(pageQuery.toMpPage());
+        Page<MsReserve> page = queryChain.orderByDesc(MsReserve::getCrtTm).page(pageQuery.toMpPage());
         List<MsReserve> records = page.getRecords();
         
         // 查询每个展览关联的藏品信息

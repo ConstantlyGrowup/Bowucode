@@ -61,14 +61,14 @@ public class UserController {
     public JsonResult login(@RequestBody MsUser user) {
         // 调用服务层方法进行登录
         String token = userService.login(user);
+        // 如果 token 为 null，说明登录失败
+        if (token==null) {
+            return JsonResult.failResult("用户名或密码错误");
+        }
         // 如果 token 为 blocked，说明登录失败
         if(token.equals(USER_BLOCKED))
         {
             return JsonResult.failResult("账号被封禁！");
-        }
-        // 如果 token 为 null，说明登录失败
-        if (token==null) {
-            return JsonResult.failResult("用户名或密码错误");
         }
         // 返回成功响应，包含 token
         return JsonResult.result(token);

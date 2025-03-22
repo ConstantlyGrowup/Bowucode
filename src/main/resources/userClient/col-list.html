@@ -177,7 +177,7 @@
 						}
 					},
 					listDicByTyp() {
-						post('dic/listDicByTyp', {dicTyp: '藏品分类'}).then(response => {
+						post('dic/listColType', {dicTyp: '藏品分类'}).then(response => {
 							this.colTyps = response.data;
 						}).catch(err => {
 							console.log(err);
