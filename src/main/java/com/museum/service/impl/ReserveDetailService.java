@@ -18,6 +18,9 @@ import com.museum.mapper.ReserveMapper;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
@@ -26,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.museum.constants.Constant.LOCK_ADD_RESERVE;
+import static com.museum.constants.Constant.CACHE_RESERVE_STOCK;
 
 /**
  * <p>
@@ -36,10 +40,14 @@ import static com.museum.constants.Constant.LOCK_ADD_RESERVE;
 @Service
 public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsReserveDetail> implements IService<MsReserveDetail> {
 
+    private static final Logger log = LoggerFactory.getLogger(ReserveDetailService.class);
+
     @Resource
     ReserveMapper reserveMapper;
     @Resource
     RedissonClient redissonClient;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
 
 
     /**
@@ -149,20 +157,39 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
         }
     }
 
-    
-
-
     /**
      * 删除预约详情
-     * @param id
-     * @throws Exception
      */
-    public Boolean delDetail(Long id) throws Exception {
-        MsReserveDetail detial = baseMapper.selectById(id);
-        if(detial == null) {
-            throw new Exception("找不到原始记录，删除失败！");
+    public boolean delDetail(Long detailId) throws Exception {
+        MsReserveDetail detail = getById(detailId);
+        if (detail == null) {
+            return false;
         }
-        return (removeById(id));
+        
+        // 如果是有效预约，需要更新库存
+        if ("1".equals(detail.getVldStat())) {
+            // 更新数据库中的预约数量
+            MsReserve reserve = reserveMapper.selectById(detail.getResId());
+            if (reserve != null && reserve.getResdSum() > 0) {
+                reserve.setResdSum(reserve.getResdSum() - 1);
+                reserveMapper.updateById(reserve);
+                
+                // 增加Redis中的可用库存
+                stringRedisTemplate.opsForValue().increment(CACHE_RESERVE_STOCK + detail.getResId());
+                
+                // 从已预约用户集合中移除
+                stringRedisTemplate.opsForSet().remove(
+                    "cache:Reserve:Order:" + detail.getResId(),
+                    detail.getUserId()
+                );
+                
+                log.info("删除预约详情，恢复Redis库存，展览ID: {}, 用户ID: {}", 
+                        detail.getResId(), detail.getUserId());
+            }
+        }
+        
+        // 删除预约记录
+        return removeById(detailId);
     }
 
     /**

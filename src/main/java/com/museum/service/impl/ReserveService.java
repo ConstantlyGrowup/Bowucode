@@ -218,6 +218,7 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         //将这个预约信息存储到redis
         //如果是之后要修改、删除，涉及到数据一致性的逻辑
         //TODO 记得把每个预约信息都要重新修改，让它能在Redis中
+        //TODO 做一个压测，和之前作对照
         stringRedisTemplate.opsForValue().set(CACHE_RESERVE_STOCK+msReserve.getId(),msReserve.getResSum().toString());
 
         // 关联多个藏品
@@ -277,5 +278,34 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         }
         List<MsReserveDetail> detials = reserveDetialMapper.selectList(detialQueryWrapper);
         return detials;
+    }
+
+    /**
+     * 同步展览库存到Redis
+     * 可以定时调用此方法，确保Redis与数据库保持一致
+     */
+    public void syncStockToRedis() {
+        log.info("开始同步展览库存到Redis...");
+        
+        // 获取所有有效的展览信息
+        List<MsReserve> reserveList = lambdaQuery()
+                .ge(MsReserve::getResDate, LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .list();
+        
+        for (MsReserve reserve : reserveList) {
+            // 重新计算可用库存
+            int availableStock = reserve.getResSum() - reserve.getResdSum();
+            
+            // 同步到Redis
+            stringRedisTemplate.opsForValue().set(
+                CACHE_RESERVE_STOCK + reserve.getId(),
+                String.valueOf(Math.max(0, availableStock))
+            );
+            
+            log.info("同步展览ID: {}, 总库存: {}, 已用: {}, 可用: {}", 
+                    reserve.getId(), reserve.getResSum(), reserve.getResdSum(), availableStock);
+        }
+        
+        log.info("展览库存同步完成，共同步{}个展览", reserveList.size());
     }
 }

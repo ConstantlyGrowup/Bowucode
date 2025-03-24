@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.museum.constants.Constant.LOCK_ADD_RESERVE;
+import static com.museum.constants.Constant.CACHE_RESERVE_STOCK;
 
 /**
  * <p>
@@ -98,19 +99,13 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
      * @param msReserveDetail
      */
     private void handleReserveOrder(MsReserveDetail msReserveDetail) {
-        //在处理这一步，redis部分各种前置条件已经满足,则需保证一人一单
+        // 获取分布式锁
         String lockKey = LOCK_ADD_RESERVE + msReserveDetail.getResId();
         RLock lock = redissonClient.getLock(lockKey);
         try {
-            boolean locked = lock.tryLock();
-            //如果获取锁不成功
-            if (!locked) {
-                log.info("系统繁忙！");
-                return;
-            }
-            //获取锁成功,后台建立预约单据
-            //redis部分满足，看数据库满不满足一人一单,是否过期等
-
+            // 获取锁并处理
+            lock.lock();
+            
             //1.检查日期，预约是否过期
             //当天日期
             LocalDate now = LocalDate.now();
@@ -147,6 +142,14 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
             // 预扣减库存并保存记录
             reserve.setResdSum(currentSum + 1);
             reserveMapper.updateById(reserve);
+        } catch (Exception e) {
+            // 异常时需要回滚Redis
+            stringRedisTemplate.opsForValue().increment(CACHE_RESERVE_STOCK + msReserveDetail.getResId());
+            stringRedisTemplate.opsForSet().remove(
+                "cache:Reserve:Order:" + msReserveDetail.getResId(),
+                msReserveDetail.getUserId()
+            );
+            log.error("预约处理异常，已回滚Redis数据", e);
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();

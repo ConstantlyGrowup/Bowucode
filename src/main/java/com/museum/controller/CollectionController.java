@@ -42,7 +42,7 @@ public class CollectionController {
      * @return
      */
     @PostMapping("/getdataList")
-    public JsonResult getdataList(@RequestBody PageQuery pageQuery) {
+    public JsonResult getdataList(@RequestBody CollectionQuery pageQuery) {
         PageResult<MsCollection> users = collectionService.listMsCollectionList(pageQuery);
         return JsonResult.result(users);
     }

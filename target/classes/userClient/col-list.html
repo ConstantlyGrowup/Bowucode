@@ -3,7 +3,7 @@
 	<head>
 		<!-- Required meta tags -->
         <meta charset="UTF-8">
-        <title>“黑悟空”主题数字文旅平台</title>
+        <title>"黑悟空"主题数字文旅平台</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
@@ -63,11 +63,12 @@
 						<div class="col-md-12">
 							<div class="search-form search-content">
 								<select class="custom-select mr-sm-2 with-icon" id="caravailable" v-model="queryInfo.cateId">
+									<option value="">全部分类</option>
 									<option :value="item.dicValue" v-for="item in colTyps">{{item.dicValue}}</option>
 								</select>
 								<div class="search-wrapper ">
 									<input id="search" placeholder="请输入标题" v-model="queryInfo.name">
-									<button class="ssubmit" type="button" name="search_submit" @click="getColData()"><i class="fas fa-search"></i></button>
+									<button class="ssubmit" type="button" name="search_submit" @click="getColDataList()"><i class="fas fa-search"></i></button>
 								</div>
 							</div>
 						</div>
@@ -94,6 +95,12 @@
 								</div>
 							</a>
 						</div>
+					</div>
+					<!-- 添加分页控件 -->
+					<div class="pagination-container" style="text-align: center; margin-top: 20px; margin-bottom: 70px;">
+						<span class="page-info" style="margin-right: 10px;">第 {{queryInfo.pagenum}} 页</span>
+						<button class="theme-button" @click="prevPage" :disabled="queryInfo.pagenum <= 1">上一页</button>
+						<button class="theme-button" @click="nextPage" :disabled="!hasNextPage">下一页</button>
 					</div>
 				</div>
 			</div>
@@ -149,14 +156,23 @@
 					queryInfo: {
 						pagenum: 1,
 						pagesize: 8,
-					}
+						name: '',
+						cateId: ''
+					},
+					total: 0,
+					hasNextPage: true
 				},
 				created() {
 					// 先检查用户状态
 					this.checkUserStatus();
 					console.log('Vue instance created');
+					// 从URL获取分类参数
 					const typ = getQueryString('type')
-					this.queryInfo.cateId = typ
+					if (typ) {
+						// 对URL参数进行解码，确保中文等特殊字符被正确解析
+						this.queryInfo.cateId = decodeURIComponent(typ)
+						console.log('获取到分类参数:', this.queryInfo.cateId)
+					}
 					this.getColDataList()
 					this.listDicByTyp()
 				},
@@ -184,12 +200,50 @@
 						});
 					},
 					getColDataList() {
+						// 确保查询条件中包含了搜索关键词
+						console.log('搜索关键词:', this.queryInfo.name);
+						console.log('查询条件:', this.queryInfo);
+						
 						post('/collect/getdataList', this.queryInfo).then(response => {
-							this.collectionData = response.data.list;
+							if (response.code === 200) {
+								this.collectionData = response.data.list;
+								this.total = response.data.total || 0;
+								// 计算是否有下一页
+								this.hasNextPage = this.queryInfo.pagenum * this.queryInfo.pagesize < this.total;
+							} else {
+								console.error('获取藏品数据失败:', response.msg);
+							}
 						}).catch(err => {
 							console.log(err);
 						});
 					},
+					// 监听分类选择变化
+					handleCategoryChange() {
+						this.queryInfo.pagenum = 1; // 切换分类时重置到第一页
+						this.getColDataList();
+					},
+					// 上一页
+					prevPage() {
+						if (this.queryInfo.pagenum > 1) {
+							this.queryInfo.pagenum--;
+							this.getColDataList();
+						}
+					},
+					// 下一页
+					nextPage() {
+						if (this.hasNextPage) {
+							this.queryInfo.pagenum++;
+							this.getColDataList();
+						}
+					}
+				},
+				watch: {
+					// 监听分类选择变化
+					'queryInfo.cateId': function(newVal, oldVal) {
+						if (newVal !== oldVal) {
+							this.handleCategoryChange();
+						}
+					}
 				}
 			})
 		</script>

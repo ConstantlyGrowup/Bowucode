@@ -54,11 +54,29 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
      * @param pageQuery
      * @return
      */
-    public PageResult<MsCollection> listMsCollectionList(PageQuery pageQuery)
+    public PageResult<MsCollection> listMsCollectionList(CollectionQuery pageQuery)
     {
-        //按照分页查询
-        Page<MsCollection> page = lambdaQuery().orderByDesc(MsCollection::getCrtTm).page(pageQuery.toMpPage());
-        return PageResult.of(page,page.getRecords());
+        // 创建Lambda查询构造器
+        // 修改为条件查询，处理name模糊搜索和cateId精确匹配
+        var query = lambdaQuery();
+        
+        // 处理name参数 - 模糊查询
+        if (StringUtils.isNotEmpty(pageQuery.getName())) {
+            query.like(MsCollection::getTitle, pageQuery.getName());
+            log.info("按名称模糊查询: {}", pageQuery.getName());
+        }
+        
+        // 处理cateId参数 - 精确匹配
+        if (StringUtils.isNotEmpty(pageQuery.getCateId())) {
+            query.eq(MsCollection::getCateId, pageQuery.getCateId());
+            log.info("按分类精确查询: {}", pageQuery.getCateId());
+        }
+        
+        // 执行分页查询
+        Page<MsCollection> page = query.orderByDesc(MsCollection::getCrtTm)
+                                      .page(pageQuery.toMpPage());
+        
+        return PageResult.of(page, page.getRecords());
     }
     
 
