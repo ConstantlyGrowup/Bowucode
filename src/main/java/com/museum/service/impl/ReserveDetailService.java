@@ -137,6 +137,9 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
             //4.条件均满足，保存预约记录
             detail.setVldStat("1");
             save(detail);
+            // 预扣减库存并保存记录
+            reserve.setResdSum(currentSum + 1);
+            reserveMapper.updateById(reserve);
             return JsonResult.result(detail.getId());
         } finally {
             // 释放锁
@@ -146,6 +149,7 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
         }
     }
 
+    
 
 
     /**
@@ -153,7 +157,7 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
      * @param id
      * @throws Exception
      */
-    public Boolean delDetail(Integer id) throws Exception {
+    public Boolean delDetail(Long id) throws Exception {
         MsReserveDetail detial = baseMapper.selectById(id);
         if(detial == null) {
             throw new Exception("找不到原始记录，删除失败！");
@@ -193,4 +197,6 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
         
         updateReserveResdSum(detail.getResId());
     }
+
+
 }

@@ -18,14 +18,19 @@ import com.museum.mapper.ReserveCollectionMapper;
 import com.museum.mapper.ReserveDetialMapper;
 import com.museum.mapper.ReserveMapper;
 import com.museum.utils.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.museum.constants.Constant.CACHE_RESERVE_STOCK;
 
 /**
  * <p>
@@ -34,6 +39,7 @@ import java.util.stream.Collectors;
  * @since 2023-22-29
  */
 @Service
+@Slf4j
 public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implements IService<MsReserve> {
     @Resource
     private ReserveDetialMapper reserveDetialMapper;
@@ -43,6 +49,8 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
     private ReserveCollectionMapper reserveCollectionMapper;
     @Resource
     private ReserveMapper reserveMapper;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     /**
      * 获取展览列表（后台管理使用）
      * @param pageQuery 分页查询参数
@@ -159,8 +167,31 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
      * @param msReserve
      */
     public void editMsReserve(MsReserve msReserve) {
+        // 获取旧的预约信息，用于比较变更
+        MsReserve oldReserve = getById(msReserve.getId());
+        if (oldReserve == null) {
+            throw new IllegalArgumentException("找不到要编辑的预约信息！");
+        }
+        
+        // 设置更新时间
         msReserve.setCrtTm(StringUtils.getNowDateTIme());
+        
+        // 更新数据库中的记录
         saveOrUpdate(msReserve);
+        
+        // 如果总预约人数变更，需要更新Redis中的数据
+        if (msReserve.getResSum() != null && !msReserve.getResSum().equals(oldReserve.getResSum())) {
+            // 计算当前可用预约数量 = 总数 - 已预约数
+            int availableCount = msReserve.getResSum() - (msReserve.getResdSum() != null ? msReserve.getResdSum() : oldReserve.getResdSum());
+            
+            // 更新Redis中的可用预约数量
+            stringRedisTemplate.opsForValue().set(
+                CACHE_RESERVE_STOCK + msReserve.getId(),
+                String.valueOf(availableCount)
+            );
+            
+            log.info("更新Redis中的预约信息，展览ID: {}, 可用预约数: {}", msReserve.getId(), availableCount);
+        }
     }
 
 
@@ -183,6 +214,11 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         String finalTitle = msReserve.getTitle() + "/" + msReserve.getResSession() + "/" + msReserve.getResTime();
         msReserve.setTitle(finalTitle);
         save(msReserve);
+
+        //将这个预约信息存储到redis
+        //如果是之后要修改、删除，涉及到数据一致性的逻辑
+        //TODO 记得把每个预约信息都要重新修改，让它能在Redis中
+        stringRedisTemplate.opsForValue().set(CACHE_RESERVE_STOCK+msReserve.getId(),msReserve.getResSum().toString());
 
         // 关联多个藏品
         for (Integer cateId : cateIds) {
@@ -208,13 +244,27 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         if(msReserve == null) {
             throw new Exception("找不到原始记录，删除失败！");
         }
+        
+        // 检查是否存在有效的预约记录
         QueryWrapper<MsReserveDetail> detialQueryWrapper = new QueryWrapper<>();
         detialQueryWrapper.lambda().eq(MsReserveDetail::getResId, id).eq(MsReserveDetail::getVldStat,"1");
         List<MsReserveDetail> data = reserveDetialMapper.selectList(detialQueryWrapper);
         if(!data.isEmpty()) {
             ExcepUtil.throwErr("该预约下存在有效的预约记录，无法删除！");
         }
+        
+        // 从数据库删除展览记录
         removeById(id);
+        
+        // 从Redis删除相关数据
+        // 1. 删除库存记录
+        stringRedisTemplate.delete(CACHE_RESERVE_STOCK + id);
+        
+        // 2. 删除展览对应的用户集合数据（该集合记录了哪些用户预约了该展览）
+        String exhibitionUserKey = "cache:Reserve:Order:" + id;
+        stringRedisTemplate.delete(exhibitionUserKey);
+        
+        log.info("删除Redis中的预约信息，展览ID: {}", id);
     }
 
     public List<MsReserveDetail> getUserReserve(Integer userId, Integer resId) {

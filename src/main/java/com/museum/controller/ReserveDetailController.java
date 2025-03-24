@@ -6,6 +6,7 @@ import com.museum.config.PageResult;
 import com.museum.domain.dto.ReserveQuery;
 import com.museum.domain.po.MsReserveDetail;
 import com.museum.service.impl.ReserveDetailService;
+import com.museum.service.impl.ReserveOrderAsyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +49,9 @@ public class ReserveDetailController {
     @Resource
     private CollectionMapper collectionMapper;
 
+    @Resource
+    private ReserveOrderAsyncService reserveOrderAsyncService;
+
     @PostMapping("/listDetailReserve")
     public JsonResult listDetailReserve(@RequestBody ReserveQuery pageQuery) {
         PageResult<MsReserveDetail> result = reserveDetailService.listMsReserveDetail(pageQuery);
@@ -66,8 +70,8 @@ public class ReserveDetailController {
     }
 
     @PostMapping("/delDetail")
-    public JsonResult delDetail(@RequestBody Map<String, Integer> request) throws Exception {
-        Integer resDetailId = request.get("id");
+    public JsonResult delDetail(@RequestBody Map<String, Long> request) throws Exception {
+        Long resDetailId = request.get("id");
         return (reserveDetailService.delDetail(resDetailId) ? 
                 JsonResult.result("删除成功") : 
                 JsonResult.failResult("网络问题！删除异常"));
@@ -115,8 +119,10 @@ public class ReserveDetailController {
             detail.setResTime(reserve.getResTime());
             detail.setResSession(reserve.getResSession());
             
-            // 调用现有的添加预约方法
-            return reserveDetailService.addDetail(detail);
+//            // 调用现有的添加预约方法
+//            return reserveDetailService.addDetail(detail);
+            //调用异步添加预约的方法
+            return reserveOrderAsyncService.addDetailAsync(detail);
         } catch (Exception e) {
             e.printStackTrace();
             return JsonResult.failResult(e.getMessage());

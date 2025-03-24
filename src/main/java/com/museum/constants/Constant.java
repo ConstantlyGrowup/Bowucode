@@ -14,6 +14,7 @@ public interface Constant {
     public static final Long CACHE_NULL_TTL = 20L;
 
     public static final String LOCK_ADD_RESERVE = "lock:addReserve:";
+    public static final String CACHE_RESERVE_STOCK ="cache:Reserve:Stock:";
 
     public static final String BLOOM_COLLECT ="collectBloomFilter";
 

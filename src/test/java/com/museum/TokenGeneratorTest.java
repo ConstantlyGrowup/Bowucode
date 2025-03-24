@@ -34,7 +34,7 @@ public class TokenGeneratorTest {
     @Test
     void generateUsersAndTokens() throws Exception {
         // 用户数量
-        final int USER_COUNT = 1000;
+        final int USER_COUNT = 200;
         // 用于保存所有token的列表
         List<String> tokens = new ArrayList<>(USER_COUNT);
         // 计数器，用于记录成功创建的用户数
