@@ -13,6 +13,8 @@ public interface Constant {
     public static final String LOCK_COLLECT_KEY="lock:collect:";
     public static final Long CACHE_NULL_TTL = 20L;
 
+    public static final String LOCK_ADD_RESERVE = "lock:addReserve:";
+
     public static final String BLOOM_COLLECT ="collectBloomFilter";
 
     public static final String  CONSTRAIN_SYSTEM_ROLE="# 角色\n" +

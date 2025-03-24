@@ -41,6 +41,8 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
     CollectionMapper collectionMapper;
     @Resource
     private ReserveCollectionMapper reserveCollectionMapper;
+    @Resource
+    private ReserveMapper reserveMapper;
     /**
      * 获取展览列表（后台管理使用）
      * @param pageQuery 分页查询参数
@@ -72,7 +74,7 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         Page<MsReserve> page = queryChain.orderByDesc(MsReserve::getCrtTm).page(pageQuery.toMpPage());
         List<MsReserve> records = page.getRecords();
         
-        // 查询每个展览关联的藏品信息
+         // 查询每个展览关联的藏品信息和当前预约人数
         for (MsReserve reserve : records) {
             // 获取展览关联的藏品ID列表
             List<Integer> cateIds = reserveCollectionMapper.findCateIdsByReserveId(reserve.getId());
@@ -82,6 +84,15 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
                 reserve.setCollections(collections);
                 reserve.setCateIds(cateIds.toArray(new Integer[0]));
             }
+            
+            // 查询当前预约人数
+            QueryWrapper<MsReserveDetail> detailQuery = new QueryWrapper<>();
+            detailQuery.lambda()
+                    .eq(MsReserveDetail::getResId, reserve.getId())
+                    .eq(MsReserveDetail::getVldStat, "1");
+            int currentReserveCount = reserveDetialMapper.selectCount(detailQuery);
+            reserve.setResdSum(currentReserveCount);
+            reserveMapper.updateById(reserve);
         }
         
         return PageResult.of(page, records);
@@ -113,11 +124,20 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
 
         Page<MsReserve> page = this.page(pageQuery.toMpPage(), queryWrapper);
         
-        // 获取每个展览关联的藏品信息
+        // 获取每个展览关联的藏品信息及已预约人数
         List<MsReserve> records = page.getRecords();
         for (MsReserve reserve : records) {
             List<Integer> cateIds = reserveCollectionMapper.findCateIdsByReserveId(reserve.getId());
             reserve.setCateIds(cateIds.toArray(new Integer[0]));
+
+             // 查询当前预约人数
+            QueryWrapper<MsReserveDetail> detailQuery = new QueryWrapper<>();
+            detailQuery.lambda()
+                    .eq(MsReserveDetail::getResId, reserve.getId())
+                    .eq(MsReserveDetail::getVldStat, "1");
+            int currentReserveCount = reserveDetialMapper.selectCount(detailQuery);
+            reserve.setResdSum(currentReserveCount);
+            reserveMapper.updateById(reserve);
         }
         
         return PageResult.of(page, records);

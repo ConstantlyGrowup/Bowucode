@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * <p>
@@ -44,6 +45,13 @@ public class ReserveDetailController {
             e.printStackTrace();
             return JsonResult.failResult(e.getMessage());
         }
+    }
+    @PostMapping("/delDetail")
+    public JsonResult delDetail(@RequestBody Map<String, Integer> request) throws Exception {
+        Integer resDetailId = request.get("id");
+        return (reserveDetailService.delDetail(resDetailId) ? 
+                JsonResult.result("删除成功") : 
+                JsonResult.failResult("网络问题！删除异常"));
     }
 
 

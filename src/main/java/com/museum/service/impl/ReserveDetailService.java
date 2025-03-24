@@ -15,6 +15,8 @@ import com.museum.mapper.CollectionMapper;
 import com.museum.mapper.ReserveCollectionMapper;
 import com.museum.mapper.ReserveDetialMapper;
 import com.museum.mapper.ReserveMapper;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -22,6 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static com.museum.constants.Constant.LOCK_ADD_RESERVE;
 
 /**
  * <p>
@@ -35,9 +39,8 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
     @Resource
     ReserveMapper reserveMapper;
     @Resource
-    CollectionMapper collectionMapper;
-    @Resource
-    private ReserveCollectionMapper reserveCollectionMapper;
+    RedissonClient redissonClient;
+
 
     /**
      * 获取用户预约列表
@@ -91,44 +94,56 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
     }
 
     /**
-     * 添加预约详情
+     * 添加预约详情，结合分布式锁
      */
     public JsonResult addDetail(MsReserveDetail detail) throws Exception {
+        //获取分布式锁
+        String lockKey = LOCK_ADD_RESERVE + detail.getResId();
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            boolean locked = lock.tryLock();
+            if(!locked)
+            {
+                return JsonResult.failResult("系统繁忙，不好意思，请重试");
+            }
+            //1.检查日期，预约是否过期
+            //当天日期
+            LocalDate now=LocalDate.now();
+            //日期转换
+            DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate resDate = LocalDate.parse(detail.getResDate(), formatter);
+            //如果已经过期
+            if(resDate.isBefore(now))
+            {
+               return JsonResult.failResult("预约已经过期！");
+            }
+            //2.检查库存余量是否充足
+            MsReserve reserve = reserveMapper.selectById(detail.getResId());//得到单个展览
+            Integer currentSum = reserve.getResdSum();
+            if(currentSum+1>reserve.getResSum())//如果加上当前预约数大于预约总数
+            {
+                return JsonResult.failResult("预约超额！");
+            }
+            //3.检查是否先前有过预约
+            QueryWrapper<MsReserveDetail> queryWrapper = new QueryWrapper<>();
+            queryWrapper.lambda()
+                    .eq(MsReserveDetail::getUserId, detail.getUserId())
+                    .eq(MsReserveDetail::getResId, detail.getResId())
+                    .eq(MsReserveDetail::getVldStat, "1");
 
-        //1.检查日期，预约是否过期
-        //当天日期
-        LocalDate now=LocalDate.now();
-        //日期转换
-        DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate resDate = LocalDate.parse(detail.getResDate(), formatter);
-        //如果已经过期
-        if(resDate.isBefore(now))
-        {
-           return JsonResult.failResult("预约已经过期！");
+            if (count(queryWrapper) > 0) {
+                return JsonResult.failResult("已经预约过该展览，不能重复预约");
+            }
+            //4.条件均满足，保存预约记录
+            detail.setVldStat("1");
+            save(detail);
+            return JsonResult.result(detail.getId());
+        } finally {
+            // 释放锁
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
-        //2.检查库存余量是否充足
-        MsReserve reserve = reserveMapper.selectById(detail.getResId());//得到单个展览
-        Integer currentSum = reserve.getResdSum();
-        if(currentSum+1>reserve.getResSum())//如果加上当前预约数大于预约总数
-        {
-            return JsonResult.failResult("预约超额！");
-        }
-        //3.检查是否先前有过预约
-        QueryWrapper<MsReserveDetail> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda()
-                .eq(MsReserveDetail::getUserId, detail.getUserId())
-                .eq(MsReserveDetail::getResId, detail.getResId())
-                .eq(MsReserveDetail::getVldStat, "1");
-
-        if (count(queryWrapper) > 0) {
-            return JsonResult.failResult("已经预约过该展览，不能重复预约");
-        }
-        //4.条件均满足，预约人数+1
-        detail.setVldStat("1");
-        reserve.setResdSum(currentSum+1);
-        save(detail);
-        reserveMapper.updateById(reserve);
-        return JsonResult.result(detail.getId());
     }
 
 
@@ -138,13 +153,12 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
      * @param id
      * @throws Exception
      */
-    public void delDetail(Integer id) throws Exception {
+    public Boolean delDetail(Integer id) throws Exception {
         MsReserveDetail detial = baseMapper.selectById(id);
         if(detial == null) {
             throw new Exception("找不到原始记录，删除失败！");
         }
-        removeById(id);
-        updateReserveResdSum(detial.getResId());
+        return (removeById(id));
     }
 
     /**
