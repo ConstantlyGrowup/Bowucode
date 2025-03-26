@@ -64,7 +64,7 @@ public class ReserveExpirationService {
                 reservation.setVldStat("0");  // 设置为无效
                 reserveDetialMapper.updateById(reservation);
                 log.info("标记过期预约 ID: {}, 用户: {}, 日期: {}", 
-                         reservation.getId(), 
+                         reservation.getOrderId(),
                          reservation.getUserName(), 
                          reservation.getResDate());
             }

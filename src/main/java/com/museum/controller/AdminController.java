@@ -296,7 +296,7 @@ public class AdminController {
     @PostMapping("/delMsReserveDetail")
     public JsonResult delDetail(@RequestBody MsReserveDetail msReserve) {
         try {
-            reserveDetailService.delDetail(msReserve.getId());
+            reserveDetailService.delDetail(msReserve.getOrderId());
             return JsonResult.result("成功！");
         }catch (Exception e){
             e.printStackTrace();

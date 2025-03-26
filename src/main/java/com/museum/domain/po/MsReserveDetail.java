@@ -21,8 +21,8 @@ public class MsReserveDetail implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "id", type = IdType.INPUT)
-    private Long id;
+    @TableId(value = "order_id", type = IdType.INPUT)
+    private Long orderId;
     private String userId;      // 用户ID
     private String userName;    // 用户名
     private Integer resId;      // 预约记录ID（展览ID）

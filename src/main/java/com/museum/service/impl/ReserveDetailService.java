@@ -148,7 +148,7 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
             // 预扣减库存并保存记录
             reserve.setResdSum(currentSum + 1);
             reserveMapper.updateById(reserve);
-            return JsonResult.result(detail.getId());
+            return JsonResult.result(detail.getOrderId());
         } finally {
             // 释放锁
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
