@@ -3,6 +3,7 @@ package com.museum.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.update.UpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -66,6 +67,8 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
     RedisIdWorker redisIdWorker;
     @Resource
     StringRedisTemplate stringRedisTemplate;
+    @Resource
+    ReserveService reserveService;
 
     //加载LUA脚本
     private static final DefaultRedisScript<Long> RESERVE_SCRIPT;
@@ -105,7 +108,7 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
             this.groupName = groupName;
             this.consumerName = consumerName;
         }
-
+        //TODO 延迟队列保证超时自动取消,超时的预约请求()等等
         @SneakyThrows
         @Override
         public void run() {
@@ -184,7 +187,7 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
      */
     private void handleReserveOrder(MsReserveDetail msReserveDetail) {
         // 获取分布式锁
-        String lockKey = LOCK_ADD_RESERVE + msReserveDetail.getResId();
+        String lockKey = LOCK_ADD_RESERVE + msReserveDetail.getUserId();
         RLock lock = redissonClient.getLock(lockKey);
         try {
             // 获取锁并处理
@@ -269,16 +272,29 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
             log.info("该用户已存在预约记录！");
             return;
         }
-        //4.条件均满足，构造并保存完整预约记录
+        
+        // 使用乐观锁进行预扣减库存
+        boolean success = reserveService.update()
+                .setSql("resd_sum=resd_sum+1")
+                .eq("id", reserve.getId())
+                .lt("resd_sum", reserve.getResSum())
+                .update();
+        
+        // 检查乐观锁更新是否成功
+        if (!success) {
+            log.info("使用乐观锁更新失败，预约人数可能已被其他线程更新，展览ID: {}", reserve.getId());
+            return;
+        }
+
+        log.info("使用乐观锁成功更新预约人数，展览ID: {}, 用户ID: {}", reserve.getId(), msReserveDetail.getUserId());
+        
+        //4.更新成功，构造并保存完整预约记录
         msReserveDetail.setVldStat("1");
         msReserveDetail.setResType(reserve.getResTyp());
         msReserveDetail.setResDate(reserve.getResDate());
         msReserveDetail.setResTime(reserve.getResTime());
         msReserveDetail.setResSession(reserve.getResSession());
         save(msReserveDetail);
-        // 预扣减库存并保存记录
-        reserve.setResdSum(currentSum + 1);
-        reserveMapper.updateById(reserve);
     }
 
 
