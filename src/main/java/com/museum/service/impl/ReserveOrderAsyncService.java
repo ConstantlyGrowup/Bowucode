@@ -39,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -78,11 +79,11 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
         RESERVE_SCRIPT.setResultType(Long.class);
     }
 
+    // 定义死信队列的键名
+    private static final String DEAD_LETTER_QUEUE = "dead:letter:queue:orders";
 
     //线程池
     private static ExecutorService reserve_order_executor = Executors.newSingleThreadExecutor();
-
-
 
     //类初始化后执行
     @PostConstruct
@@ -143,8 +144,7 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
             }
         }
         private void handlePendingList() {
-            while(true)
-            {
+            while(true) {
                 try {
                     //1.获取消息队列中的订单信息 XREADGROUP GROUP g1 c1 COUNT 1 BLOCK 2000 STREAMS streams.order >
                     List<MapRecord<String, Object, Object>> list = stringRedisTemplate.opsForStream().read(//这个方法支持返回多个流，list里有多个流。
@@ -152,34 +152,81 @@ public class ReserveOrderAsyncService extends ServiceImpl<ReserveDetialMapper, M
                             StreamReadOptions.empty().count(1),
                             StreamOffset.create(queueName, ReadOffset.from("0"))
                     );
-                    //2.判断是否有消息
-                    if(list==null||list.isEmpty())
-                    {
-                        //list为空，则无需处理
+                    
+                    // 2.判断是否有消息
+                    if(list == null || list.isEmpty()) {
+                        // Pending-list为空，结束循环
                         break;
                     }
-                    //有消息，解析消息
-                    MapRecord<String, Object, Object> record = list.get(0);//这里只有stream.orders，取一个就行;数据类型为 流名称，消息ID，消息内容
+                    
+                    // 获取消息记录
+                    MapRecord<String, Object, Object> record = list.get(0);
+                    String messageId = record.getId().toString();
                     Map<Object, Object> values = record.getValue();
-                    //3.解析成msReserveDetail数据
+                    
+                    // 3.解析成预约对象
                     MsReserveDetail msReserveDetail = BeanUtil.fillBeanWithMap(values, new MsReserveDetail(), true);
-                    //4.处理预约订单
-                    handleReserveOrder(msReserveDetail);
-                    //5.ACK确认
-                    stringRedisTemplate.opsForStream().acknowledge(queueName,groupName,record.getId());
+                    
+                    // 4.处理预约订单，设置最大重试次数
+                    int retryCount = 0;
+                    boolean processed = false;
+                    Exception lastException = null;
+                    
+                    // 重试机制，最多尝试3次
+                    while (retryCount < 3 && !processed) {
+                        try {
+                            handleReserveOrder(msReserveDetail);
+                            // 处理成功
+                            processed = true;
+                            // 确认消息处理完成
+                            stringRedisTemplate.opsForStream().acknowledge(queueName, groupName, messageId);
+                            log.info("Pending消息处理成功，消息ID: {}", messageId);
+                        } catch (Exception e) {
+                            retryCount++;
+                            lastException = e;
+                            log.warn("处理Pending消息异常，第{}次重试，消息ID: {}", retryCount, messageId, e);
+                            // 短暂延迟后重试
+                            try {
+                                Thread.sleep(200 * retryCount); // 重试间隔递增
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                    }
+                    
+                    // 如果处理失败且达到重试上限，则放入死信队列
+                    if (!processed) {
+                        log.error("处理Pending消息失败，达到最大重试次数，放入死信队列，消息ID: {}", messageId, lastException);
+                        
+                        // 添加额外信息后放入死信队列
+                        Map<String, String> dlqValues = new HashMap<>(values.size() + 3);
+                        values.forEach((k, v) -> dlqValues.put(k.toString(), v.toString()));
+                        
+                        // 添加额外的失败信息
+                        dlqValues.put("failureTime", LocalDateTime.now().toString());
+                        dlqValues.put("failureReason", lastException != null ? lastException.getMessage() : "未知错误");
+                        dlqValues.put("originalMessageId", messageId);
+                        
+                        // 将失败的消息放入死信队列
+                        stringRedisTemplate.opsForHash().putAll(DEAD_LETTER_QUEUE + ":" + messageId, dlqValues);
+                        
+                        // 删除原消息
+                        stringRedisTemplate.opsForStream().acknowledge(queueName, groupName, messageId);
+                        log.info("消息已转入死信队列，原始消息ID: {}", messageId);
+                    }
+                    
                 } catch (Exception e) {
-                    log.debug("处理Pending-list异常",e);
+                    log.error("处理Pending-list出现系统异常", e);
+                    // 系统级异常，暂停一会儿
                     try {
-                        Thread.sleep(20);
+                        Thread.sleep(500);
                     } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
         }
     }
-
-
 
     /**
      * 用于处理、生成后台预约订单
