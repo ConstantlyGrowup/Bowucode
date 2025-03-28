@@ -7,7 +7,7 @@ public interface Constant {
     public static final String DATA_FIELD_NAME_CREATE_TIME = "create_time";
     public static final String USER_BLOCKED="blocked";
 
-    public static final Long CACHE_COLLECT_TTL = 30L;
+    public static final Long CACHE_COLLECT_TTL = 24L;
     public static final String CACHE_COLLECT = "cache:Collection:";
     public static final String CACHE_CATE_TYPE = "cache:CollectionType:";
     public static final String LOCK_COLLECT_KEY="lock:collect:";

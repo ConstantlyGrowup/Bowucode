@@ -127,6 +127,12 @@
             -->
             <scope>provided</scope>
         </dependency>
+        <!-- MinIO依赖 -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.2</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

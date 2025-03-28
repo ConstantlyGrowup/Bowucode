@@ -1,25 +1,21 @@
 package com.museum.controller;
 
-
 import com.museum.config.JsonResult;
+import com.museum.config.MinioConfig;
+import com.museum.utils.MinioUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
+import io.minio.MinioClient;
 
 /**
  * <p>
@@ -32,51 +28,61 @@ import java.util.Random;
 @RequestMapping("/file")
 @RequiredArgsConstructor
 public class FileController {
-    private final static String FILE_UPLOAD_PATH = "C:\\Users\\lly\\Pictures\\DigitalPlatformUsed";
+    
+    private final MinioUtils minioUtils;
+    private final MinioConfig minioConfig;
+    private final MinioClient minioClient;
+
     @PostMapping("/uploadFile")
-    public JsonResult getdata(@RequestParam("file") MultipartFile[] file) {
-        if(file == null || file.length<1) {
-            JsonResult.failResult("文件上传失败");
+    public JsonResult uploadFile(@RequestParam("file") MultipartFile[] file) {
+        if(file == null || file.length < 1) {
+            return JsonResult.failResult("文件上传失败");
         }
         if (file[0].isEmpty()){
-            JsonResult.failResult("文件上传失败");
+            return JsonResult.failResult("文件上传失败");
         }
+        
         String fileName = file[0].getOriginalFilename();
         String suffixName = fileName.substring(fileName.lastIndexOf("."));
-        //生成文件名称通用方法
+        
+        // 生成文件名称通用方法
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         Random r = new Random();
         StringBuilder tempName = new StringBuilder();
         tempName.append(sdf.format(new Date())).append(r.nextInt(100)).append(suffixName);
-        String newFileName = tempName.toString();
+        String objectName = tempName.toString();
+        
         try {
-            //保存文件
-            byte[] bytes = file[0].getBytes();
-            Path path = Paths.get(FILE_UPLOAD_PATH+newFileName);
-            Files.write(path,bytes);
-            return JsonResult.result(tempName);
-        }catch (IOException e){
+            // 获取文件MIME类型
+            String contentType = file[0].getContentType();
+            
+            // 上传到MinIO
+            minioUtils.uploadFile(
+                    minioConfig.getBucketName(), 
+                    objectName, 
+                    file[0].getInputStream(),
+                    contentType
+            );
+            
+            return JsonResult.result(objectName);
+        } catch (Exception e) {
             e.printStackTrace();
+            return JsonResult.failResult("文件上传失败: " + e.getMessage());
         }
-        return JsonResult.failResult("文件上传失败");
     }
 
     @GetMapping("/getPic")
     public void getPic(String name, HttpServletResponse response) {
         try {
-            FileInputStream fileInputStream = new FileInputStream(FILE_UPLOAD_PATH + name);
-            ServletOutputStream outputStream = response.getOutputStream();
-            response.setContentType("image/jpeg");
-            int len = 0;
-            byte[] bytes = new byte[1024];
-            while ((len = fileInputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, len);
-                outputStream.flush();
-            }
-            outputStream.flush();
-            outputStream.close();
-            fileInputStream.close();
-        }catch (Exception e){
+            // 生成有效期为7天的预签名URL
+            String presignedUrl = minioUtils.getPresignedUrl(
+                    minioConfig.getBucketName(), 
+                    name, 
+                    7 * 24 * 60 * 60  // 7天的秒数
+            );
+            
+            response.sendRedirect(presignedUrl);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
