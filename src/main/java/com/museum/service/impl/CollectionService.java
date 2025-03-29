@@ -191,6 +191,7 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
      */
     public void addColl(MsCollection collection) {
         collection.setCrtTm(StringUtils.getNowDateTIme());
+        collection.setViewCnt(0);
         save(collection);
         RBloomFilter<Object> bloomFilter = redissonClient.getBloomFilter(BLOOM_COLLECT);
         bloomFilter.add(collection.getId());

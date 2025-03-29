@@ -217,8 +217,7 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
 
         //将这个预约信息存储到redis
         //如果是之后要修改、删除，涉及到数据一致性的逻辑
-        //TODO 记得把每个预约信息都要重新修改，让它能在Redis中
-        //TODO 做一个压测，和之前作对照
+
         stringRedisTemplate.opsForValue().set(CACHE_RESERVE_STOCK+msReserve.getId(),msReserve.getResSum().toString());
 
         // 关联多个藏品

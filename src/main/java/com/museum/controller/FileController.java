@@ -74,16 +74,27 @@ public class FileController {
     @GetMapping("/getPic")
     public void getPic(String name, HttpServletResponse response) {
         try {
-            // 生成有效期为7天的预签名URL
+            // 添加参数验证
+            if (name == null || name.equals("undefined") || name.trim().isEmpty()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid image name parameter");
+                return;
+            }
+            
+            // 生成有效期为1天的预签名URL
             String presignedUrl = minioUtils.getPresignedUrl(
                     minioConfig.getBucketName(), 
                     name, 
-                    7 * 24 * 60 * 60  // 7天的秒数
+                    24 * 60 * 60  // 1天的秒数
             );
             
             response.sendRedirect(presignedUrl);
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error retrieving image");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
