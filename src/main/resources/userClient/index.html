@@ -42,6 +42,62 @@
                 padding: 10px; /* 设置内边距 */
                 z-index: 9999;
             }
+            
+            /* 导览僧悬浮样式 - 更新 */
+            .tour-monk-float {
+                position: fixed;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 999;
+                transition: all 0.3s ease;
+            }
+            
+            .tour-monk-link {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-decoration: none;
+                color: #333;
+                padding: 8px;
+                border-radius: 10px;
+                transition: all 0.3s ease;
+            }
+            
+            .tour-monk-link:hover {
+                transform: scale(1.05);
+            }
+            
+            .monk-image {
+                width: 150px; /* 增加图片尺寸 */
+                height: auto;
+                margin-bottom: 5px;
+            }
+            
+            .monk-text {
+                font-size: 16px; /* 增加文字尺寸 */
+                font-weight: bold;
+                text-align: center;
+                text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); /* 添加文字阴影以增强可读性 */
+            }
+            
+            /* 在移动设备上调整大小和位置 */
+            @media (max-width: 768px) {
+                .tour-monk-float {
+                    right: 10px;
+                    bottom: 70px;
+                    top: auto;
+                    transform: none;
+                }
+                
+                .monk-image {
+                    width: 70px; /* 移动设备上的图片尺寸也增加 */
+                }
+                
+                .monk-text {
+                    font-size: 14px;
+                }
+            }
         </style>
 	</head>
 <body class="default">
@@ -103,6 +159,27 @@
                                             <img :src="'img/m' + (index+1) + '.png'" alt="icon">
                                             <div class="s-icon-text">
                                                 {{item.dicValue}}
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- 添加第三行，包含酒店民宿和景区必玩榜 -->
+                                <div class="row" style="display: flex; justify-content: center; margin-top: 15px;">
+                                    <div class="col s-icon" style="margin: 0 15px;">
+                                        <a href="https://map.baidu.com/search/%E9%85%92%E5%BA%97/@12349827.74,4372592.12,19z?querytype=nb&r=1000&wd=%E9%85%92%E5%BA%97&nb_x=12349827.75&nb_y=4372592.13&uid=0058610845d2cfa646e274df&b=(12349450.354975866,4372430.124158017;12350205.136797978,4372801.618336087)&l=19&gr_radius=1000&pn=0&device_ratio=1&da_src=shareurl"
+                                           class="homepage-icon-menu">
+                                            <img src="img/m11.png" alt="icon">
+                                            <div class="s-icon-text">
+                                                酒店民宿
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col s-icon" style="margin: 0 15px;">
+                                        <a href="https://map.baidu.com/search/%E6%99%AF%E7%82%B9/@12325156.51000001,4337590.690000011,11z?querytype=nb&c=368&wd=%E6%99%AF%E7%82%B9&da_src=shareurl&on_gel=1&l=11&gr=1&b=(12202276.51000001,4277110.690000011;12448036.51000001,4398070.690000011)&pl_data_type=scope&pl_price_section=0,%2B&pl_sort_rule=0&pl_discount2_section=0,%2B&pl_groupon_section=0,%2B&pl_cater_book_pc_section=0,%2B&pl_hotel_book_pc_section=0,%2B&pl_ticket_book_flag_section=0,%2B&pl_movie_book_section=0,%2B&pl_business_type=scope&uid=0058610845d2cfa646e274df&nb_x=12349827.75&nb_y=4372592.13&gr_radius=1000&pn=0&device_ratio=1"
+                                           class="homepage-icon-menu">
+                                            <img src="img/m10.png" alt="icon">
+                                            <div class="s-icon-text">
+                                                景区必玩榜
                                             </div>
                                         </a>
                                     </div>
@@ -330,6 +407,12 @@
 				</div>
 			</div>
 			<!-- .Bottom Panel  -->
+			<div class="tour-monk-float">
+				<a href="ChatTest.html" class="tour-monk-link" title="点击开始AI智能导览">
+					<img src="img/tourMonk1.png" alt="导览僧" class="monk-image">
+					<div class="monk-text">导览僧</div>
+				</a>
+			</div>
 			<div class="overlay"></div>
 			<!-- Optional JavaScript -->
 			<!-- jQuery v3.4.1 -->
@@ -387,6 +470,7 @@
                 },
                 mounted() {
                     this.getData()
+                    this.getAnnouncementData()
                     this.getColData()
                     this.fetchUserMe() // 获取用户信息
                     this.getAnnouncementList()
