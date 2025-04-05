@@ -129,4 +129,14 @@ public class ReserveDetailController {
         }
     }
 
+    @PostMapping("/cancelDetail")
+    public JsonResult cancelDetail(@RequestBody MsReserveDetail detail) {
+        try {
+             return reserveDetailService.cancelDetail(detail);
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonResult.failResult(e.getMessage());
+        }
+    }
+
 }

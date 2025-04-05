@@ -192,7 +192,7 @@
                                     class="theme-button">
                                 取消并重新预约
                             </button>
-                            <button @click="handleDelete(item.id)"
+                            <button @click="handleDelete(item.orderId)"
                                     class="theme-button danger">
                                 删除
                             </button>
@@ -235,7 +235,7 @@
                             class="theme-button">
                         取消并重新预约
                     </button>
-                    <button @click="handleDelete(item.id)"
+                    <button @click="handleDelete(item.orderId)"
                             class="theme-button danger">
                         删除
                     </button>
@@ -336,9 +336,8 @@
                     }
                     
                     try {
-                        const response = await post('/reserveDetail/editDetail', {
-                            ...item,
-                            vldStat: '0'
+                        const response = await post('/reserveDetail/cancelDetail', {
+                            ...item
                         });
                         
                         if (response.code === 200) {
@@ -357,8 +356,16 @@
                         return;
                     }
                     
+                    // 添加日志确认id值
+                    console.log('正在删除预约ID:', id);
+                    
+                    if (!id) {
+                        alert('无效的预约ID');
+                        return;
+                    }
+                    
                     try {
-                        const response = await post('/reserveDetail/delDetail', { id });
+                        const response = await post('/reserveDetail/delDetail', { id: id });
                         if (response.code === 200) {
                             await this.fetchReservations();
                             alert('删除成功');

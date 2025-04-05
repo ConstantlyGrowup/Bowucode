@@ -57,7 +57,7 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
     public PageResult<MsReserveDetail> listMsReserveDetail(ReserveQuery pageQuery) {
         LambdaQueryChainWrapper<MsReserveDetail> lambdaQueryChainWrapper = lambdaQuery();
         if(null != pageQuery.getUserId()) {
-            lambdaQueryChainWrapper.eq(MsReserveDetail::getUserId, pageQuery.getUserId());
+            lambdaQueryChainWrapper.eq(MsReserveDetail::getUserId, pageQuery.getUserId()).orderByDesc(MsReserveDetail::getVldStat);
         }
         
         Page<MsReserveDetail> page = lambdaQueryChainWrapper.page(pageQuery.toMpPage());
@@ -213,16 +213,41 @@ public class ReserveDetailService extends ServiceImpl<ReserveDetialMapper, MsRes
     /**
      * 取消预约
      */
-    public void cancelDetail(Integer detailId) throws Exception {
-        MsReserveDetail detail = getById(detailId);
-        if (detail == null) {
-            throw new IllegalArgumentException("预约记录不存在");
+    public JsonResult cancelDetail(MsReserveDetail detail) throws Exception {
+        try {
+            if(detail==null)
+            {
+                return JsonResult.failResult("该预约信息为空！");
+            }
+            if(detail.getVldStat().equals("0"))
+            {
+                return JsonResult.failResult("该预约已经是无效状态！");
+            }
+
+            // 取消预约，更新数据库中的预约数量
+            detail.setVldStat("0");
+            updateById(detail);
+            MsReserve reserve = reserveMapper.selectById(detail.getResId());
+            if (reserve != null && reserve.getResdSum() > 0) {
+                reserve.setResdSum(reserve.getResdSum() - 1);
+                reserveMapper.updateById(reserve);
+
+                // 增加Redis中的可用库存
+                stringRedisTemplate.opsForValue().increment(CACHE_RESERVE_STOCK + detail.getResId());
+
+                // 从已预约用户集合中移除
+                stringRedisTemplate.opsForSet().remove(
+                        "cache:Reserve:Order:" + detail.getResId(),
+                        detail.getUserId()
+                );
+
+                log.info("取消该预约，恢复Redis库存，展览ID: {}, 用户ID: {}",
+                        detail.getResId(), detail.getUserId());
+            }
+            return JsonResult.result("取消成功!");
+        } catch (Exception e) {
+            return JsonResult.failResult("取消失败！原因为："+e);
         }
-        
-        detail.setVldStat("0");
-        updateById(detail);
-        
-        updateReserveResdSum(detail.getResId());
     }
 
 

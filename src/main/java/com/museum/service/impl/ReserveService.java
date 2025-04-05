@@ -135,10 +135,19 @@ public class ReserveService extends ServiceImpl<ReserveMapper, MsReserve> implem
         // 获取每个展览关联的藏品信息及已预约人数
         List<MsReserve> records = page.getRecords();
         for (MsReserve reserve : records) {
+            // 获取展览关联的藏品ID列表
             List<Integer> cateIds = reserveCollectionMapper.findCateIdsByReserveId(reserve.getId());
-            reserve.setCateIds(cateIds.toArray(new Integer[0]));
+            if (!cateIds.isEmpty()) {
+                // 查询藏品详细信息
+                List<MsCollection> collections = collectionMapper.selectBatchIds(cateIds);
+                reserve.setCollections(collections);
+                reserve.setCateIds(cateIds.toArray(new Integer[0]));
+            } else {
+                // 确保collections不为null
+                reserve.setCollections(new ArrayList<>());
+            }
 
-             // 查询当前预约人数
+            // 查询当前预约人数
             QueryWrapper<MsReserveDetail> detailQuery = new QueryWrapper<>();
             detailQuery.lambda()
                     .eq(MsReserveDetail::getResId, reserve.getId())
