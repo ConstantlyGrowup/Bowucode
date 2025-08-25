@@ -34,9 +34,9 @@ knife4j: #开启增强模式
   enable: true
 minio:
   endpoint: http://127.0.0.1:9005
-  accessKey: username
-  secretKey: password
-  bucketName: collection-pic
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: pic4bowu
 
 
 

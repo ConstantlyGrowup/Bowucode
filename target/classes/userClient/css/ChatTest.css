@@ -222,3 +222,57 @@ footer {
     margin: 10px 0;
     color: #666;
 }
+
+/* 全屏布局相关样式 */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.background-gradient {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.app-header {
+    flex: 0 0 auto;
+    padding: 15px;
+}
+
+.app-main {
+    flex: 1 1 auto;
+    display: flex;
+    overflow: hidden;
+    padding: 0 15px;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+#chat-messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    margin-bottom: 10px;
+}
+
+#chat-form {
+    flex: 0 0 auto;
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.app-footer {
+    flex: 0 0 auto;
+    padding: 10px;
+}

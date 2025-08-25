@@ -30,7 +30,8 @@ import static com.museum.constants.Constant.*;
  * 用户实现类。包括增删改查
  */
 @Service
-public class UserService extends ServiceImpl<MsUserMapper, MsUser> implements IService<MsUser> {
+public class
+UserService extends ServiceImpl<MsUserMapper, MsUser> implements IService<MsUser> {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
