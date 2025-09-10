@@ -292,7 +292,7 @@
                             </div>
 
                             <!-- 分页控制 -->
-                            <div class="pagination-container" style="text-align: center; margin-top: 20px;">
+                            <div v-if="menuId === 1 || menuId === 2" class="pagination-container" style="text-align: center; margin-top: 20px;">
                                 <span class="page-info" style="margin-right: 10px;">第 {{queryInfo.pagenum}} 页</span>
                                 <button class="theme-button" @click="prevPage" :disabled="queryInfo.pagenum <= 1">上一页</button>
                                 <button class="theme-button" @click="nextPage" :disabled="!hasNextPage">下一页</button>
