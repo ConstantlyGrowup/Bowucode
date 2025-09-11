@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -52,7 +53,7 @@ public class NewsController {
      * 获取最新的新闻数据（供客户端展示）
      * @return 新闻数据列表
      */
-    @PostMapping("/list")
+    @GetMapping("/list")
     public JsonResult getLatestNews() {
         try {
             log.info("客户端请求获取最新新闻数据");
@@ -73,8 +74,8 @@ public class NewsController {
      * @param batchId 批次ID
      * @return 新闻数据
      */
-    @PostMapping("/getByBatchId")
-    public JsonResult getNewsByBatchId(@RequestParam String batchId) {
+    @GetMapping("/batch/{batchId}")
+    public JsonResult getNewsByBatchId(@PathVariable String batchId) {
         try {
             log.info("客户端请求获取指定批次新闻数据，批次ID: {}", batchId);
             
@@ -90,6 +91,26 @@ public class NewsController {
         } catch (Exception e) {
             log.error("获取指定批次新闻数据失败", e);
             return JsonResult.failResult("获取指定批次新闻数据失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取所有历史批次ID列表
+     * @return 批次ID列表
+     */
+    @GetMapping("/batches")
+    public JsonResult getAllBatchIds() {
+        try {
+            log.info("客户端请求获取所有批次ID列表");
+            
+            // 从Redis获取所有批次ID
+            Set<String> batchIds = newsService.getAllBatchIds();
+            
+            log.info("成功返回批次ID列表，共 {} 个批次", batchIds.size());
+            return JsonResult.result(batchIds);
+        } catch (Exception e) {
+            log.error("获取批次ID列表失败", e);
+            return JsonResult.failResult("获取批次ID列表失败: " + e.getMessage());
         }
     }
 }

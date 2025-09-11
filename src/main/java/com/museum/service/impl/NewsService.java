@@ -42,7 +42,8 @@ public class NewsService {
 
     /**
      * 处理并存储新闻数据到Redis
-     * @param newsBatches 新闻批次数据
+     * 每周只收到一批数据，需要累积存储历史批次
+     * @param newsBatches 新闻批次数据（通常只包含一个批次）
      */
     public void processAndStoreNews(List<NewsBatch> newsBatches) {
         if (CollUtil.isEmpty(newsBatches)) {
@@ -50,30 +51,36 @@ public class NewsService {
             return;
         }
 
-        for (NewsBatch batch : newsBatches) {
-            if (batch == null || StrUtil.isBlank(batch.getBatchId())) {
-                log.warn("批次数据无效，跳过处理: {}", batch);
-                continue;
-            }
-
-            try {
-                // 存储单个批次数据
-                storeNewsBatch(batch);
-                
-                // 更新批次列表
-                updateBatchList(batch.getBatchId());
-                
-                log.info("成功存储新闻批次: {}", batch.getBatchId());
-            } catch (Exception e) {
-                log.error("存储新闻批次失败: {}", batch.getBatchId(), e);
-                throw new RuntimeException("存储新闻批次失败: " + batch.getBatchId(), e);
-            }
+        // 每周只收到一批数据，取第一个批次
+        NewsBatch batch = newsBatches.get(0);
+        if (batch == null || StrUtil.isBlank(batch.getBatchId())) {
+            log.warn("批次数据无效，跳过处理: {}", batch);
+            return;
         }
 
-        // 更新最新新闻缓存
-        updateLatestNewsCache();
-        
-        log.info("所有新闻批次处理完成，共处理 {} 个批次", newsBatches.size());
+        // 检查批次是否已存在（避免重复存储）
+        if (isBatchExists(batch.getBatchId())) {
+            String errorMsg = "批次已存在，拒绝重复推送: " + batch.getBatchId();
+            log.warn(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+
+        try {
+            // 存储单个批次数据
+            storeNewsBatch(batch);
+            
+            // 更新批次列表（添加到历史批次中）
+            addToBatchList(batch.getBatchId());
+            
+            // 更新最新新闻缓存
+            updateLatestNewsCache();
+            
+            log.info("成功存储新闻批次: {}，包含 {} 条新闻", batch.getBatchId(), 
+                    batch.getItems() != null ? batch.getItems().size() : 0);
+        } catch (Exception e) {
+            log.error("存储新闻批次失败: {}", batch.getBatchId(), e);
+            throw new RuntimeException("存储新闻批次失败: " + batch.getBatchId() + "，错误信息: " + e.getMessage());
+        }
     }
 
     /**
@@ -91,17 +98,27 @@ public class NewsService {
     }
 
     /**
-     * 更新批次列表
+     * 检查批次是否已存在
+     * @param batchId 批次ID
+     * @return 是否存在
+     */
+    private boolean isBatchExists(String batchId) {
+        String batchKey = NEWS_BATCH_KEY_PREFIX + batchId;
+        return stringRedisTemplate.hasKey(batchKey);
+    }
+
+    /**
+     * 将批次ID添加到历史批次列表中
      * @param batchId 批次ID
      */
-    private void updateBatchList(String batchId) {
-        // 将批次ID添加到批次列表中
+    private void addToBatchList(String batchId) {
+        // 将批次ID添加到批次列表中（使用Set避免重复）
         stringRedisTemplate.opsForSet().add(NEWS_BATCHES_KEY, batchId);
         
         // 设置批次列表的过期时间
         stringRedisTemplate.expire(NEWS_BATCHES_KEY, CACHE_EXPIRE_DAYS, TimeUnit.DAYS);
         
-        log.debug("更新批次列表: {}", batchId);
+        log.debug("添加批次到历史列表: {}", batchId);
     }
 
     /**
@@ -116,7 +133,7 @@ public class NewsService {
                 return;
             }
 
-            // 获取最新的几个批次（最多5个）
+            // 获取最新的几个批次（最多5个，供客户端展示）
             List<NewsBatch> latestBatches = new ArrayList<>();
             int count = 0;
             int maxBatches = 5;
@@ -226,33 +243,4 @@ public class NewsService {
         return stringRedisTemplate.opsForSet().members(NEWS_BATCHES_KEY);
     }
 
-    /**
-     * 清理过期的新闻数据
-     */
-    public void cleanExpiredNews() {
-        try {
-            Set<String> batchIds = getAllBatchIds();
-            if (CollUtil.isEmpty(batchIds)) {
-                return;
-            }
-            
-            int cleanedCount = 0;
-            for (String batchId : batchIds) {
-                String batchKey = NEWS_BATCH_KEY_PREFIX + batchId;
-                if (!stringRedisTemplate.hasKey(batchKey)) {
-                    // 批次数据已过期，从批次列表中移除
-                    stringRedisTemplate.opsForSet().remove(NEWS_BATCHES_KEY, batchId);
-                    cleanedCount++;
-                }
-            }
-            
-            if (cleanedCount > 0) {
-                log.info("清理过期新闻数据完成，共清理 {} 个批次", cleanedCount);
-                // 重新更新最新新闻缓存
-                updateLatestNewsCache();
-            }
-        } catch (Exception e) {
-            log.error("清理过期新闻数据失败", e);
-        }
-    }
 }
