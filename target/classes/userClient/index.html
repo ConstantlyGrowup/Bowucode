@@ -3,825 +3,947 @@
 <head>
     <meta charset="UTF-8">
     <title>"黑悟空"主题数字文旅平台</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<meta name="mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-touch-fullscreen" content="yes">
-		<meta name="HandheldFriendly" content="True">
-		<!-- Bootstrap v4.3.1 CSS -->
-		<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
-		<!-- Custom CSS -->
-		<link rel="stylesheet" href="css/normalize.css">
-		<link rel="stylesheet" href="css/theme.css">
-		<!-- Slick CSS -->
-		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
-		<link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
-		<!-- Magnific Popup core CSS file -->
-		<link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
-		<!-- Font Awesome Free 5.10.2 CSS JS -->
-		<link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
-		<script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
-		<script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
-		<script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
-        <script src="./util/vue.js"></script>
-        <script src="./util/axios.js"></script>
-        <script src="./util/request.js"></script>
-        <script src="lib/echarts/echarts.js"></script>
-        <style scoped>
-            /* CSS样式 */
-            .popup {
-                position: fixed; /* 设置定位为fixed，使其相对于视口进行定位 */
-                top: 50%; /* 将垂直居中 */
-                left: 50%; /* 将水平居中 */
-                transform: translate(-50%, -50%); /* 通过transform属性移动到正确的位置 */
-                width: 80%; /* 设置宽度 */
-                height: 50vh; /* 设置高度 */
-                overflow-y: auto;
-                background-color: #fff; /* 设置背景色 */
-                border: 1px solid #ccc; /* 设置边框 */
-                padding: 10px; /* 设置内边距 */
-                z-index: 9999;
-            }
-            
-            /* 导览僧悬浮样式 - 更新 */
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="HandheldFriendly" content="True">
+    <!-- Bootstrap v4.3.1 CSS -->
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <!-- Slick CSS -->
+    <link rel="stylesheet" type="text/css" href="lib/slick/slick/slick.css">
+    <link rel="stylesheet" type="text/css" href="lib/slick/slick/slick-theme.css">
+    <!-- Magnific Popup core CSS file -->
+    <link rel="stylesheet" href="lib/Magnific-Popup-master/dist/magnific-popup.css">
+    <!-- Font Awesome Free 5.10.2 CSS JS -->
+    <link href="lib/fontawesome-free-5.10.2-web/css/all.css" rel="stylesheet">
+    <script defer src="lib/fontawesome-free-5.10.2-web/js/brands.js"></script>
+    <script defer src="lib/fontawesome-free-5.10.2-web/js/solid.js"></script>
+    <script defer src="lib/fontawesome-free-5.10.2-web/js/fontawesome.js"></script>
+    <script src="./util/vue.js"></script>
+    <script src="./util/axios.js"></script>
+    <script src="./util/request.js"></script>
+    <script src="lib/echarts/echarts.js"></script>
+    <style scoped>
+        /* CSS样式 */
+        .popup {
+            position: fixed; /* 设置定位为fixed，使其相对于视口进行定位 */
+            top: 50%; /* 将垂直居中 */
+            left: 50%; /* 将水平居中 */
+            transform: translate(-50%, -50%); /* 通过transform属性移动到正确的位置 */
+            width: 80%; /* 设置宽度 */
+            height: 50vh; /* 设置高度 */
+            overflow-y: auto;
+            background-color: #fff; /* 设置背景色 */
+            border: 1px solid #ccc; /* 设置边框 */
+            padding: 10px; /* 设置内边距 */
+            z-index: 9999;
+        }
+
+        /* 导览僧悬浮样式 - 更新 */
+        .tour-monk-float {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        .tour-monk-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            padding: 8px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .tour-monk-link:hover {
+            transform: scale(1.05);
+        }
+
+        .monk-image {
+            width: 150px; /* 增加图片尺寸 */
+            height: auto;
+            margin-bottom: 5px;
+        }
+
+        .monk-text {
+            font-size: 16px; /* 增加文字尺寸 */
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); /* 添加文字阴影以增强可读性 */
+        }
+
+        /* 在移动设备上调整大小和位置 */
+        @media (max-width: 768px) {
             .tour-monk-float {
-                position: fixed;
-                right: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                z-index: 999;
-                transition: all 0.3s ease;
+                right: 10px;
+                bottom: 70px;
+                top: auto;
+                transform: none;
             }
-            
-            .tour-monk-link {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-decoration: none;
-                color: #333;
-                padding: 8px;
-                border-radius: 10px;
-                transition: all 0.3s ease;
-            }
-            
-            .tour-monk-link:hover {
-                transform: scale(1.05);
-            }
-            
+
             .monk-image {
-                width: 150px; /* 增加图片尺寸 */
-                height: auto;
-                margin-bottom: 5px;
+                width: 70px; /* 移动设备上的图片尺寸也增加 */
             }
-            
+
             .monk-text {
-                font-size: 16px; /* 增加文字尺寸 */
-                font-weight: bold;
-                text-align: center;
-                text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); /* 添加文字阴影以增强可读性 */
+                font-size: 14px;
             }
-            
-            /* 在移动设备上调整大小和位置 */
-            @media (max-width: 768px) {
-                .tour-monk-float {
-                    right: 10px;
-                    bottom: 70px;
-                    top: auto;
-                    transform: none;
-                }
-                
-                .monk-image {
-                    width: 70px; /* 移动设备上的图片尺寸也增加 */
-                }
-                
-                .monk-text {
-                    font-size: 14px;
-                }
-            }
-        </style>
-	</head>
+        }
+    </style>
+</head>
 <body class="default">
-		<div class="preloading">
-			<div class="wrap-preload">
-				<div class="cssload-loader"></div>
-			</div>
-		</div>
-			<!-- Header  -->
-        <div id="loginVue">
-            <nav class="navbar navbar-expand-lg navbar-light bg-header">
-                <div class="container-fluid">
-                    <div class="logo">
-                        "黑悟空"主题数字文旅平台
-                        <span style="float: right" v-if="userInf.id == null">
+<div class="preloading">
+    <div class="wrap-preload">
+        <div class="cssload-loader"></div>
+    </div>
+</div>
+<!-- Header  -->
+<div id="loginVue">
+    <nav class="navbar navbar-expand-lg navbar-light bg-header">
+        <div class="container-fluid">
+            <div class="logo">
+                "黑悟空"主题数字文旅平台
+                <span style="float: right" v-if="userInf.id == null">
                             <a type="button" class="theme-button" href="ChatTest.html" style="font-size: 10px;margin-right: 10px;">Ai导览僧</a>
                             <a type="button" class="theme-button" href="login.html" style="font-size: 10px">登录</a>
                         </span>
-                        <span style="float: right;font-size: 10px;" v-if="userInf.id != null">
+                <span style="float: right;font-size: 10px;" v-if="userInf.id != null">
                             <a type="button" class="theme-button" href="ChatTest.html" style="font-size: 10px;margin-right: 10px;">Ai导览僧</a>
                             <a type="button" class="theme-button" href="setting.html" style="font-size: 10px">欢迎：{{userInf.nickname}}</a>
                             <a type="button" class="theme-button" href="javascript:void(0)" @click="loginOut()" style="font-size: 10px">登出</a>
                         </span>
+            </div>
+        </div>
+    </nav>
+</div>
+<!-- .Header  -->
+<!-- Content  -->
+<div id="content">
+    <!-- Content Wrap  -->
+    <div class="content-wrap">
+        <!-- slider -->
+        <div class="img-hero">
+            <div>
+                <img src="img/slide-index1.jpg" alt="slider">
+            </div>
+            <div>
+                <img src="img/slide-index2.jpg" alt="slider">
+            </div>
+        </div>
+        <div id="app">
+            <div class="home-icon">
+                <div class="section-home">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col s-icon" v-for="(item, index) in colTyps" v-if="index<=4" @click="gotoDetial(item.dicValue)">
+                                <a href="javascript:void(0)"  class="homepage-icon-menu">
+                                    <img :src="'img/m' + (index+1) + '.png'" alt="icon">
+                                    <div class="s-icon-text">
+                                        {{item.dicValue}}
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s-icon" v-for="(item, index) in colTyps" v-if="index>4 && index<=8" @click="gotoDetial(item.dicValue)">
+                                <a href="javascript:void(0)" class="homepage-icon-menu">
+                                    <img :src="'img/m' + (index+1) + '.png'" alt="icon">
+                                    <div class="s-icon-text">
+                                        {{item.dicValue}}
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- 添加第三行，包含酒店民宿和景区必玩榜 -->
+                        <div class="row" style="display: flex; justify-content: center; margin-top: 15px;">
+                            <div class="col s-icon" style="margin: 0 15px;">
+                                <a href="https://map.baidu.com/search/%E9%85%92%E5%BA%97/@12349827.74,4372592.12,19z?querytype=nb&r=1000&wd=%E9%85%92%E5%BA%97&nb_x=12349827.75&nb_y=4372592.13&uid=0058610845d2cfa646e274df&b=(12349450.354975866,4372430.124158017;12350205.136797978,4372801.618336087)&l=19&gr_radius=1000&pn=0&device_ratio=1&da_src=shareurl"
+                                   class="homepage-icon-menu">
+                                    <img src="img/m11.png" alt="icon">
+                                    <div class="s-icon-text">
+                                        酒店民宿
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col s-icon" style="margin: 0 15px;">
+                                <a href="https://map.baidu.com/search/%E6%99%AF%E7%82%B9/@12325156.51000001,4337590.690000011,11z?querytype=nb&c=368&wd=%E6%99%AF%E7%82%B9&da_src=shareurl&on_gel=1&l=11&gr=1&b=(12202276.51000001,4277110.690000011;12448036.51000001,4398070.690000011)&pl_data_type=scope&pl_price_section=0,%2B&pl_sort_rule=0&pl_discount2_section=0,%2B&pl_groupon_section=0,%2B&pl_cater_book_pc_section=0,%2B&pl_hotel_book_pc_section=0,%2B&pl_ticket_book_flag_section=0,%2B&pl_movie_book_section=0,%2B&pl_business_type=scope&uid=0058610845d2cfa646e274df&nb_x=12349827.75&nb_y=4372592.13&gr_radius=1000&pn=0&device_ratio=1"
+                                   class="homepage-icon-menu">
+                                    <img src="img/m10.png" alt="icon">
+                                    <div class="s-icon-text">
+                                        景区必玩榜
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </nav>
-        </div>
-			<!-- .Header  -->
-			<!-- Content  -->
-			<div id="content">
-				<!-- Content Wrap  -->
-				<div class="content-wrap">
-					<!-- slider -->
-					<div class="img-hero">
-						<div>
-							<img src="img/slide-index1.jpg" alt="slider">
-						</div>
-						<div>
-							<img src="img/slide-index2.jpg" alt="slider">
-						</div>
-					</div>
-                    <div id="app">
-					<div class="home-icon">
-						<div class="section-home">
-							<div class="container">
-								<div class="row">
-                                    <div class="col s-icon" v-for="(item, index) in colTyps" v-if="index<=4" @click="gotoDetial(item.dicValue)">
-                                        <a href="javascript:void(0)"  class="homepage-icon-menu">
-                                            <img :src="'img/m' + (index+1) + '.png'" alt="icon">
-                                            <div class="s-icon-text">
-                                                {{item.dicValue}}
-                                            </div>
-                                        </a>
-                                    </div>
-								</div>
-                                <div class="row">
-                                    <div class="col s-icon" v-for="(item, index) in colTyps" v-if="index>4 && index<=8" @click="gotoDetial(item.dicValue)">
-                                        <a href="javascript:void(0)" class="homepage-icon-menu">
-                                            <img :src="'img/m' + (index+1) + '.png'" alt="icon">
-                                            <div class="s-icon-text">
-                                                {{item.dicValue}}
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- 添加第三行，包含酒店民宿和景区必玩榜 -->
-                                <div class="row" style="display: flex; justify-content: center; margin-top: 15px;">
-                                    <div class="col s-icon" style="margin: 0 15px;">
-                                        <a href="https://map.baidu.com/search/%E9%85%92%E5%BA%97/@12349827.74,4372592.12,19z?querytype=nb&r=1000&wd=%E9%85%92%E5%BA%97&nb_x=12349827.75&nb_y=4372592.13&uid=0058610845d2cfa646e274df&b=(12349450.354975866,4372430.124158017;12350205.136797978,4372801.618336087)&l=19&gr_radius=1000&pn=0&device_ratio=1&da_src=shareurl"
-                                           class="homepage-icon-menu">
-                                            <img src="img/m11.png" alt="icon">
-                                            <div class="s-icon-text">
-                                                酒店民宿
-                                            </div>
-                                        </a>
-                                    </div>
-                                    <div class="col s-icon" style="margin: 0 15px;">
-                                        <a href="https://map.baidu.com/search/%E6%99%AF%E7%82%B9/@12325156.51000001,4337590.690000011,11z?querytype=nb&c=368&wd=%E6%99%AF%E7%82%B9&da_src=shareurl&on_gel=1&l=11&gr=1&b=(12202276.51000001,4277110.690000011;12448036.51000001,4398070.690000011)&pl_data_type=scope&pl_price_section=0,%2B&pl_sort_rule=0&pl_discount2_section=0,%2B&pl_groupon_section=0,%2B&pl_cater_book_pc_section=0,%2B&pl_hotel_book_pc_section=0,%2B&pl_ticket_book_flag_section=0,%2B&pl_movie_book_section=0,%2B&pl_business_type=scope&uid=0058610845d2cfa646e274df&nb_x=12349827.75&nb_y=4372592.13&gr_radius=1000&pn=0&device_ratio=1"
-                                           class="homepage-icon-menu">
-                                            <img src="img/m10.png" alt="icon">
-                                            <div class="s-icon-text">
-                                                景区必玩榜
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-							</div>
-						</div>
-					</div>
-					<div class="heading-section" style="display: flex">
-						<div v-for="item in menuData" :key="item.id" :id="item" @click="checkMenu(item)" :class="{'ischeck': item.id === menuId}" style="padding: 10px;font-size: 15px;cursor: pointer">{{item.name}}</div>
-					</div>
-                        <div class="row" style="max-height: 80vh;overflow-y: auto">
-                            <div v-if="showReservePop" class="popup">
-                                <a href="#" style="float: right" @click="showReservePop = false">关闭</a>
-                                <dv>
-                                    <button @click="showReservePop = false">关闭</button>
-                                </dv>
-                                <p v-html="popHtml"></p>
-                            </div>
-                        </div>
-                        <div class="row" style="max-height: 80vh;overflow-y: auto">
-                            <div v-if="showAnnooucementPop" class="popup">
-                                <a href="#" style="float: right" @click="showAnnooucementPop = false">关闭</a>
-                                <div class="subsite-heading">
-                                    {{annoObj.title}}
-                                </div>
-                                <p v-html="annoObj.contentText"></p>
-                            </div>
-                        </div>
-                        <div class="row" style="max-height: 80vh;overflow-y: auto">
-                            <div v-if="showAnnouncementDetailPop" class="popup">
-                                <a href="javascript:void(0)" style="float: right" @click="closeAnnouncementDetail">关闭</a>
-                                <div class="subsite-heading">
-                                    {{currentAnnouncement.title}}
-                                </div>
-                                <p v-html="currentAnnouncement.contentText"></p>
-                                <!-- 添加公告时间 -->
-                                <div class="announcement-date">
-                                    发布时间：{{currentAnnouncement.date}}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 预约详情弹窗 -->
-                        <div class="row" style="max-height: 80vh;overflow-y: auto">
-                            <div v-if="showReserveDetailPop" class="popup" style="width: 90%; max-width: 800px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); padding: 20px;">
-                                <a href="javascript:void(0)" style="float: right; font-size: 16px;" @click="closeReserveDetail">关闭</a>
-                                <div class="subsite-heading" style="text-align: center; margin-bottom: 20px; font-size: 22px; color: #333;">
-                                    {{currentReserve.title}}
-                                </div>
-                                <div class="reserve-info">
-                                    <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
-                                        <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                                            <p style="font-size: 16px;"><strong>预约时间:</strong> {{currentReserve.resDate}} {{currentReserve.resTime}}</p>
-                                            <p style="font-size: 16px;"><strong>可预约数:</strong> {{currentReserve.resSum - currentReserve.resdSum}}/{{currentReserve.resSum}}</p>
-                                        </div>
-                                        <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                                            <div id="reserveChart" style="height: 200px; width: 100%;"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <p style="font-size: 16px;"><strong>预约详情:</strong></p>
-                                    <p style="font-size: 15px; line-height: 1.5; margin-bottom: 15px;" v-html="currentReserve.resDes"></p>
-                                    
-                                    <div v-if="currentReserve.collections && currentReserve.collections.length > 0">
-                                        <p style="font-size: 16px;"><strong>包含藏品:</strong></p>
-                                        <div class="collections-list" style="display: flex; flex-wrap: wrap; gap: 15px; margin: 15px 0;">
-                                            <div v-for="collection in currentReserve.collections" :key="collection.id" class="collection-item" 
-                                                 style="padding: 10px; border-radius: 8px; background-color: #f5f7fa; min-width: 150px; display: flex; align-items: center;">
-                                                <img v-if="collection.colPic" :src="'http://localhost:8090/api/file/getPic?name=' + collection.colPic" 
-                                                     style="width: 50px; height: 50px; border-radius: 8px; margin-right: 10px; object-fit: cover;">
-                                                <div>{{collection.title}}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-else style="font-style: italic; color: #999; margin: 15px 0;">
-                                        该预约暂无关联藏品
-                                    </div>
-                                    
-                                    <div style="text-align: center; margin-top: 20px;">
-                                        <button class="theme-button" @click="goToReserve(currentReserve.id)" 
-                                                :disabled="currentReserve.resSum <= currentReserve.resdSum"
-                                                style="padding: 10px 30px; font-size: 16px;">
-                                            立即预约
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                            <!-- 公告列表 -->
-                            <div v-if="menuId === 1" class="section-home home-news">
-                                <!-- 遍历公告数据 -->
-                                <div class="home-news-wrap">
-                                    <div v-for="(item, index) in announcementData" :key="item.id" class="news-item">
-                                        <div class="news-content" style="display: flex;">
-                                            <!-- 公告标题和内容 -->
-                                            <div class="hnw-desc" style="width: 100%">
-                                            <div class="hnw-title" style="font-weight: bold; font-size: 18px; color: #0b0b0b; margin-bottom: 12px;">
-                                                    {{ item.title }}
-                                                </div>
-                                                <!-- 公告内容简要 -->
-                                                <div class="hnw-text">
-                                                <p style="color: #666; margin-bottom: 12px; font-size: 15px;" v-html="item.contentText ? (item.contentText.length > 30 ? item.contentText.slice(0, 30) + '...' : item.contentText) : '暂无公告内容'"></p>
-                                                    <!-- 查看详情按钮 -->
-                                                <span class="more" style="color: #2450a6; cursor: pointer; font-size: 15px;" @click="showAnnouncementDetail(item)">查看详情</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 分页控制 -->
-                            <div v-if="menuId === 1 || menuId === 2" class="pagination-container" style="text-align: center; margin-top: 20px;">
-                                <span class="page-info" style="margin-right: 10px;">第 {{queryInfo.pagenum}} 页</span>
-                                <button class="theme-button" @click="prevPage" :disabled="queryInfo.pagenum <= 1">上一页</button>
-                                <button class="theme-button" @click="nextPage" :disabled="!hasNextPage">下一页</button>
-                            </div>
-                        </div>
-
-                        <!-- 预约列表 -->
-                        <div v-if="menuId === 2" class="section-home home-news">
-                            <div class="home-news-wrap">
-                                <div v-for="(item, index) in reserveData" :key="item.id" class="news-item">
-                                    <div class="news-content" style="display: flex;">
-                                        <div class="hnw-desc" style="width: 100%">
-                                            <div class="hnw-title" style="font-weight: bold; font-size: 18px; color: #0b0b0b; margin-bottom: 12px;">
-                                                {{ item.title }}
-                                            </div>
-                                            <div class="hnw-text">
-                                                <p style="color: #666; margin-bottom: 12px; font-size: 15px;">
-                                                    时间: {{ item.resDate }} {{ item.resTime }} | 剩余: {{ item.resSum - item.resdSum }}/{{ item.resSum }}
-                                                </p>
-                                                <span class="more" style="color: #2450a6; cursor: pointer; font-size: 15px;" @click="showReserveDetail(item)">查看详情</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 分页控制 -->
-                                <div class="pagination-container" style="text-align: center; margin-top: 20px;">
-                                    <span class="page-info" style="margin-right: 10px;">第 {{queryInfo.pagenum}} 页</span>
-                                    <button class="theme-button" @click="prevPage" :disabled="queryInfo.pagenum <= 1">上一页</button>
-                                    <button class="theme-button" @click="nextPage" :disabled="!hasNextPage">下一页</button>
-                                </div>
-                            </div>
-
-                            <!-- 藏品列表 -->
-                        <div v-if="menuId === 3 || menuId === 4" id="newsItem" class="home-news-wrap">
-                                <!-- 遍历藏品数据 -->
-                                <div>
-                                    <a :href="'collDetail.html?id='+item.id" v-for="(item, index) in collectionData" v-if="item.origin">
-                                        <div class="news-item" @mouseenter="handleMouseEnter(item)" @mouseleave="handleMouseLeave(item)">
-                                            <div class="news-content" style="display: flex;">
-                                            <div class="hnw-img" style="margin-right: 20px;">
-                                                <img style="max-width: 80px;max-height: 80px;border-radius: 10px;" :src="'http://localhost:8090/api/file/getPic?name=' + item.colPic" alt="news">
-                                                </div>
-                                                <div class="hnw-desc">
-                                                <div style="font-weight: bold; font-size: 18px;">{{ item.title }}</div>
-                                                    <div class="hnw-text">
-                                                    <p style="font-size: 15px;" v-html="item.desColl.length > 100 ? item.desColl.slice(0, 100) + '...' : item.desColl"></p>
-                                                    <span class="more" style="font-size: 15px;">查看详情</span>
-                                                </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                <!-- 查看更多藏品 - 居中显示 -->
-                                <div class="more-category" v-if="collectionData && collectionData.length > 0 && collectionData[0].origin" style="text-align: center; margin: 20px 0;">
-                                        <a href="col-list.html">
-                                            <div class="theme-button mcbutton">查看更多</div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="section-subscribe">
-						<div class="subcontainer">
-							<div class="subrow">
-								<div class="subcol">
-									<div class="section-title">留言建议</div>
-									<div class="mail-subscribe-box">
-										<form name="subsribe">
-											<input v-model="feedContext" class="form-control" name="user-email" placeholder="如需改进，欢迎小主反馈...." value="" type="email">
-											<button @click="sendFeedBack()" type="button" class="submitsub"> <i class="fa fa-angle-right"></i></button>
-										</form>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="bg-subscribe">
-							<img src="img/image.jpg" alt="banner">
-						</div>
-					</div>
+            </div>
+            <div class="heading-section" style="display: flex">
+                <div v-for="item in menuData" :key="item.id" :id="item" @click="checkMenu(item)" :class="{'ischeck': item.id === menuId}" style="padding: 10px;font-size: 15px;cursor: pointer">{{item.name}}</div>
+            </div>
+            <div class="row" style="max-height: 80vh;overflow-y: auto">
+                <div v-if="showReservePop" class="popup">
+                    <a href="#" style="float: right" @click="showReservePop = false">关闭</a>
+                    <dv>
+                        <button @click="showReservePop = false">关闭</button>
+                    </dv>
+                    <p v-html="popHtml"></p>
                 </div>
-				</div>
-			</div>
-			<!-- .Content  -->
-			<!-- 底部面板  -->
-			<div class="bottom-panel">
-				<div class="bp-col">
-					<a href="index.html">
-						<div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
-						<div class="selected-bottom-text">首页</div>
-					</a>
-				</div>
-                <div class="bp-col">
-                    <a href="col-list.html">
-                        <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
-                        <div class="bp-text">藏品</div>
+            </div>
+            <div class="row" style="max-height: 80vh;overflow-y: auto">
+                <div v-if="showAnnooucementPop" class="popup">
+                    <a href="#" style="float: right" @click="showAnnooucementPop = false">关闭</a>
+                    <div class="subsite-heading">
+                        {{annoObj.title}}
+                    </div>
+                    <p v-html="annoObj.contentText"></p>
+                </div>
+            </div>
+            <div class="row" style="max-height: 80vh;overflow-y: auto">
+                <div v-if="showAnnouncementDetailPop" class="popup">
+                    <a href="javascript:void(0)" style="float: right" @click="closeAnnouncementDetail">关闭</a>
+                    <div class="subsite-heading">
+                        {{currentAnnouncement.title}}
+                    </div>
+                    <p v-html="currentAnnouncement.contentText"></p>
+                    <!-- 添加公告时间 -->
+                    <div class="announcement-date">
+                        发布时间：{{currentAnnouncement.date}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预约详情弹窗 -->
+            <div class="row" style="max-height: 80vh;overflow-y: auto">
+                <div v-if="showReserveDetailPop" class="popup" style="width: 90%; max-width: 800px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); padding: 20px;">
+                    <a href="javascript:void(0)" style="float: right; font-size: 16px;" @click="closeReserveDetail">关闭</a>
+                    <div class="subsite-heading" style="text-align: center; margin-bottom: 20px; font-size: 22px; color: #333;">
+                        {{currentReserve.title}}
+                    </div>
+                    <div class="reserve-info">
+                        <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
+                            <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
+                                <p style="font-size: 16px;"><strong>预约时间:</strong> {{currentReserve.resDate}} {{currentReserve.resTime}}</p>
+                                <p style="font-size: 16px;"><strong>可预约数:</strong> {{currentReserve.resSum - currentReserve.resdSum}}/{{currentReserve.resSum}}</p>
+                            </div>
+                            <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
+                                <div id="reserveChart" style="height: 200px; width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 16px;"><strong>预约详情:</strong></p>
+                        <p style="font-size: 15px; line-height: 1.5; margin-bottom: 15px;" v-html="currentReserve.resDes"></p>
+
+                        <div v-if="currentReserve.collections && currentReserve.collections.length > 0">
+                            <p style="font-size: 16px;"><strong>包含藏品:</strong></p>
+                            <div class="collections-list" style="display: flex; flex-wrap: wrap; gap: 15px; margin: 15px 0;">
+                                <div v-for="collection in currentReserve.collections" :key="collection.id" class="collection-item"
+                                     style="padding: 10px; border-radius: 8px; background-color: #f5f7fa; min-width: 150px; display: flex; align-items: center;">
+                                    <img v-if="collection.colPic" :src="'http://localhost:8090/api/file/getPic?name=' + collection.colPic"
+                                         style="width: 50px; height: 50px; border-radius: 8px; margin-right: 10px; object-fit: cover;">
+                                    <div>{{collection.title}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else style="font-style: italic; color: #999; margin: 15px 0;">
+                            该预约暂无关联藏品
+                        </div>
+
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="theme-button" @click="goToReserve(currentReserve.id)"
+                                    :disabled="currentReserve.resSum <= currentReserve.resdSum"
+                                    style="padding: 10px 30px; font-size: 16px;">
+                                立即预约
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 公告列表 -->
+            <div v-if="menuId === 1" class="section-home home-news">
+                <!-- 遍历公告数据 -->
+                <div class="home-news-wrap">
+                    <div v-for="(item, index) in announcementData" :key="item.id" class="news-item">
+                        <div class="news-content" style="display: flex;">
+                            <!-- 公告标题和内容 -->
+                            <div class="hnw-desc" style="width: 100%">
+                                <div class="hnw-title" style="font-weight: bold; font-size: 18px; color: #0b0b0b; margin-bottom: 12px;">
+                                    {{ item.title }}
+                                </div>
+                                <!-- 公告内容简要 -->
+                                <div class="hnw-text">
+                                    <p style="color: #666; margin-bottom: 12px; font-size: 15px;" v-html="item.contentText ? (item.contentText.length > 30 ? item.contentText.slice(0, 30) + '...' : item.contentText) : '暂无公告内容'"></p>
+                                    <!-- 查看详情按钮 -->
+                                    <span class="more" style="color: #2450a6; cursor: pointer; font-size: 15px;" @click="showAnnouncementDetail(item)">查看详情</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页控制 -->
+                <div class="pagination-container" style="text-align: center; margin-top: 20px;">
+                    <span class="page-info" style="margin-right: 10px;">第 {{queryInfo.pagenum}} 页</span>
+                    <button class="theme-button" @click="prevPage" :disabled="queryInfo.pagenum <= 1">上一页</button>
+                    <button class="theme-button" @click="nextPage" :disabled="!hasNextPage">下一页</button>
+                </div>
+            </div>
+
+            <!-- 预约列表 -->
+            <div v-if="menuId === 2" class="section-home home-news">
+                <div class="home-news-wrap">
+                    <div v-for="(item, index) in reserveData" :key="item.id" class="news-item">
+                        <div class="news-content" style="display: flex;">
+                            <div class="hnw-desc" style="width: 100%">
+                                <div class="hnw-title" style="font-weight: bold; font-size: 18px; color: #0b0b0b; margin-bottom: 12px;">
+                                    {{ item.title }}
+                                </div>
+                                <div class="hnw-text">
+                                    <p style="color: #666; margin-bottom: 12px; font-size: 15px;">
+                                        时间: {{ item.resDate }} {{ item.resTime }} | 剩余: {{ item.resSum - item.resdSum }}/{{ item.resSum }}
+                                    </p>
+                                    <span class="more" style="color: #2450a6; cursor: pointer; font-size: 15px;" @click="showReserveDetail(item)">查看详情</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页控制 -->
+                <div class="pagination-container" style="text-align: center; margin-top: 20px;">
+                    <span class="page-info" style="margin-right: 10px;">第 {{queryInfo.pagenum}} 页</span>
+                    <button class="theme-button" @click="prevPage" :disabled="queryInfo.pagenum <= 1">上一页</button>
+                    <button class="theme-button" @click="nextPage" :disabled="!hasNextPage">下一页</button>
+                </div>
+            </div>
+
+            <!-- 藏品列表 -->
+            <div v-if="menuId === 3 || menuId === 4" id="newsItem" class="home-news-wrap">
+                <!-- 遍历藏品数据 -->
+                <div>
+                    <a :href="'collDetail.html?id='+item.id" v-for="(item, index) in collectionData" v-if="item.origin">
+                        <div class="news-item" @mouseenter="handleMouseEnter(item)" @mouseleave="handleMouseLeave(item)">
+                            <div class="news-content" style="display: flex;">
+                                <div class="hnw-img" style="margin-right: 20px;">
+                                    <img style="max-width: 80px;max-height: 80px;border-radius: 10px;" :src="'http://localhost:8090/api/file/getPic?name=' + item.colPic" alt="news">
+                                </div>
+                                <div class="hnw-desc">
+                                    <div style="font-weight: bold; font-size: 18px;">{{ item.title }}</div>
+                                    <div class="hnw-text">
+                                        <p style="font-size: 15px;" v-html="item.desColl.length > 100 ? item.desColl.slice(0, 100) + '...' : item.desColl"></p>
+                                        <span class="more" style="font-size: 15px;">查看详情</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </a>
+                    <!-- 查看更多藏品 - 居中显示 -->
+                    <div class="more-category" v-if="collectionData && collectionData.length > 0 && collectionData[0].origin" style="text-align: center; margin: 20px 0;">
+                        <a href="col-list.html">
+                            <div class="theme-button mcbutton">查看更多</div>
+                        </a>
+                    </div>
                 </div>
-				<div class="bp-col">
-					<a href="ReserveDetail.html">
-						<div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
-						<div class="bp-text">我的预约</div>
-					</a>
-				</div>
-				<div class="bp-col">
-					<a href="setting.html">
-						<div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
-						<div class="bp-text">个人中心</div>
-					</a>
-				</div>
-			</div>
-			<!-- .Bottom Panel  -->
-			<div class="tour-monk-float">
-				<a href="ChatTest.html" class="tour-monk-link" title="点击开始AI智能导览">
-					<img src="img/tourMonk1.png" alt="导览僧" class="monk-image">
-					<div class="monk-text">导览僧</div>
-				</a>
-			</div>
-			<div class="overlay"></div>
-			<!-- Optional JavaScript -->
-			<!-- jQuery v3.4.1 -->
-			<script src="lib/jquery/jquery-3.4.1.min.js"></script>
-			<!--  Bootstrap v4.3.1 JS -->
-			<script src="lib/bootstrap/js/bootstrap.min.js"></script>
-			<!-- Magnific Popup core JS file -->
-			<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
-			<!-- Slick JS -->
-			<script src="lib/slick/slick/slick.min.js"></script>
-			<!--  Custom JS -->
-			<script src="js/theme.js"></script>
+            </div>
 
-            <script src="lib/elementui/element.js"></script>
-            <script src="lib/elementui/css/element.css"></script>
-        <script>
-            const vm = new Vue({
-                el: '#app',
-                data: {
-                    menuData: [
-                        { id: 1, name: '近期新闻公告' },
-                        { id: 2, name: '预约一览' },
-                        { id: 3, name: '藏品一览' },
-                        { id: 4, name: '热门藏品' }
-                    ],
-                    userInf: {}, // 用户信息从接口获取
-                    showAnnooucementPop: false,
-                    annoObj: {},
-                    menuId: 1,
-                    colTyps : [],
-                    collectionData : [],
-                    queryInfo: {
-                        name: '',
-                        pagenum: 1,
-                        pagesize: 5,  // 每页显示6条公告
-                        menuName: '藏品一览'
-                    },
-                    feedContext: '',
-                    isNewsDesc: false,
-                    collectionDataDesc: {},
-                    resSum: 0,
-                    resdSum: 0,
-                    feedContext: '',
-                    showReservePop: false,
-                    popHtml: '',
-                    announcementData: [], // 存储公告列表数据
-                    announcementList: [],    //存储置顶公告数据
-                    total: 0,        // 总记录数
-                    hasNextPage: true, // 是否有下一页
-                    showAnnouncementDetailPop: false,  // 控制详情弹窗显示
-                    currentAnnouncement: {},           // 当前查看的公告
-                    showReserveDetailPop: false,
-                    currentReserve: {},
-                    reserveData: [],
-                },
-                mounted() {
-                    this.getData()
-                    this.getAnnouncementData()
-                    this.getColData()
-                    this.fetchUserMe() // 获取用户信息
-                    this.getAnnouncementList()
-                },
-                methods: {
-                    fetchUserMe() {
-                        try {
-                            // 从 sessionStorage 中读取 token
-                            const token = sessionStorage.getItem('token');
-                            console.log('当前token为： ', token)
-                            // 如果 token 为空，表示当前为游客模式，不调用 me 接口
-                            if (!token) {
-                                console.log('未检测到 token，当前为游客模式');
-                                this.userInf = {}; // 确保用户信息为空对象
-                                return;
-                            }
+            <!-- 历史人文新闻列表 -->
+            <div v-if="menuId === 5" class="section-home home-news">
+                <!-- 加载状态 -->
+                <div v-if="newsLoading" class="loading-container" style="text-align: center; padding: 40px;">
+                    <div style="color: #666; font-size: 16px;">正在加载历史人文新闻...</div>
+                </div>
+                
+                <!-- 新闻数据为空 -->
+                <div v-else-if="!newsData || newsData.length === 0" class="empty-container" style="text-align: center; padding: 40px;">
+                    <div style="color: #999; font-size: 16px;">暂无历史人文新闻数据</div>
+                </div>
+                
+                <!-- 新闻批次列表 -->
+                <div v-else class="home-news-wrap">
+                    <div v-for="(batch, batchIndex) in newsData" :key="batch.BatchId" class="news-batch">
+                        <!-- 批次标题 -->
+                        <div class="batch-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">
+                                📰 历史人文新闻
+                            </div>
+                            <div style="font-size: 14px; opacity: 0.9;">
+                                批次时间: {{ formatBatchTime(batch.BatchTime) }}
+                            </div>
+                        </div>
+                        
+                        <!-- 新闻条目列表 -->
+                        <div class="news-items">
+                            <div v-for="(item, itemIndex) in batch.Items" :key="item.ItemId" class="news-item" style="margin-bottom: 20px; border: 1px solid #e8e8e8; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <div class="news-content" style="padding: 20px; background: white;">
+                                    <!-- 新闻标题 -->
+                                    <div class="hnw-title" style="font-weight: bold; font-size: 18px; color: #2c3e50; margin-bottom: 12px; line-height: 1.4;">
+                                        {{ item.Title }}
+                                    </div>
+                                    
+                                    <!-- 新闻元信息 -->
+                                    <div class="news-meta" style="display: flex; align-items: center; margin-bottom: 12px; font-size: 13px; color: #7f8c8d;">
+                                        <span style="margin-right: 15px;">
+                                            <i class="fas fa-calendar-alt" style="margin-right: 5px;"></i>
+                                            {{ formatNewsDate(item.NewsDate) }}
+                                        </span>
+                                        <span style="margin-right: 15px;">
+                                            <i class="fas fa-newspaper" style="margin-right: 5px;"></i>
+                                            {{ item.Media }}
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- 新闻内容摘要 -->
+                                    <div class="hnw-text" style="margin-bottom: 15px;">
+                                        <p style="color: #555; font-size: 15px; line-height: 1.6; margin: 0;">
+                                            {{ item.Content }}
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- 查看原文链接 -->
+                                    <div class="news-actions">
+                                        <a :href="item.Link" target="_blank" style="color: #3498db; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center;">
+                                            <i class="fas fa-external-link-alt" style="margin-right: 5px;"></i>
+                                            查看原文
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                            // 调用 /api/user/me 接口获取用户信息
-                            get('/user/me').then(response => {
-                                // 检查接口返回的状态码
-                                if (response.code === 200) {
-                                    if (response.data) {
-                                        // 有用户数据，表示已登录
-                                        this.userInf = response.data;
-                                        console.log('已获取用户信息:', this.userInf);
-                                    } else {
-                                        // 数据为空，表示 token 可能无效或过期
-                                        console.log('未获取到用户登录信息，当前为游客模式');
-                                        this.userInf = {}; // 清空用户信息
-                                    }
-                                } else {
-                                    // 请求成功但返回了错误码
-                                    console.error('请求失败:', response.msg);
-                                    this.userInf = {}; // 清空用户信息
-                                }
-                            }).catch(error => {
-                                // 网络错误或后端异常
-                                console.error('获取用户信息时发生异常:', error);
-                                this.userInf = {}; // 清空用户信息
-                            });
-                        } catch (error) {
-                            console.error('fetchUserMe方法执行出错:', error);
-                            this.userInf = {}; // 确保用户信息为空对象
-                        }
-                    },
-                    checkMenu(item) {
-                        this.menuId = item.id
-                        this.queryInfo.menuName = item.name
-                        
-                        if (item.id === 1) {
-                            // 近期新闻公告
-                            this.queryInfo.pagenum = 1;
-                            this.getAnnouncementData();
-                        } else if (item.id === 2) {
-                            // 预约一览
-                            this.queryInfo.pagenum = 1;
-                            this.getReserveData();
-                        } else if (item.id === 3 || item.id === 4) {
-                            // 藏品一览或热门藏品
-                            this.queryInfo.pagenum = 1;
-                            this.getColData();
-                        }
-                    },
-                    showPop(item) {
-                        this.showReservePop = true
-                        this.popHtml = item.resDes
-                    },
-                    getData() {
-                        post('/dic/listColType', {dicTyp: '藏品分类'}).then(response => {
-                            this.colTyps = response.data;
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    async getAnnouncementList() {
-                        post('/announcement/listMsAnnouncementTop', {}).then(res => {
-                            if (res.code !== 200) {
-                                alert(res.msg)
-                                return
-                            }else {
-                                this.announcementList = res.data.list
-                                if(this.announcementList && this.announcementList.length > 0) {
-                                    this.showAnnooucementPop = true
-                                    this.annoObj = this.announcementList[0]
-                                }
-                            }
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    getColData() {
-                        post('/collect/getdataTop', this.queryInfo).then(response => {
-                            this.collectionData = response.data.list;
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    gotoDetial(category) {
-                        console.log('点击分类:', category);
-                        // 使用encodeURIComponent确保中文等特殊字符被正确编码
-                        window.location.href = 'col-list.html?type=' + encodeURIComponent(category);
-                    },
-                    sendFeedBack(value) {
-                        const token = sessionStorage.getItem('token')
-                        if(token === null || token === '') {
-                            window.location.href='login.html'
-                            return
-                        }
-                        // 从 userInf 中获取用户信息
-                        if (!this.userInf || !this.userInf.id) {
-                            alert('获取用户信息失败')
-                            return
-                        }
-                        if(this.feedContext === '') {
-                            alert('请输入留言信息')
-                            return;
-                        }
-                        const info = {
-                            userId: this.userInf.id,
-                            cateId: '',
-                            feedContent: this.feedContext,
-                            userName: this.userInf.username
-                        }
-                        post('/feedBack/addFeedBack', info).then(response => {
-                            alert('成功！')
-                            this.feedContext = ''
-                        }).catch(err => {
-                            console.log(err);
-                        });
-                    },
-                    getAnnouncementData() {
-                        post('/announcement/listMsAnnouncement', this.queryInfo)
-                            .then(response => {
-                                if (response.code === 200) {
-                                    this.announcementData = response.data.list || [];
-                                    this.total = response.data.total;
-                                    this.hasNextPage = this.queryInfo.pagenum * this.queryInfo.pagesize < this.total;
-                                } else {
-                                    alert(response.msg);
-                                }
-                            })
-                            .catch(err => {
-                                console.log(err);
-                            });
-                    },
-                    // 上一页
-                    prevPage() {
-                        if (this.queryInfo.pagenum > 1) {
-                            this.queryInfo.pagenum--;
-                            if (this.menuId === 1) {
-                                this.getAnnouncementData();
-                            } else if (this.menuId === 2) {
-                                this.getReserveData();
-                            } else {
-                                this.getColData();
-                            }
-                        }
-                    },
-                    // 下一页
-                    nextPage() {
-                        if (this.hasNextPage) {
-                            this.queryInfo.pagenum++;
-                            if (this.menuId === 1) {
-                                this.getAnnouncementData();
-                            } else if (this.menuId === 2) {
-                                this.getReserveData();
-                            } else {
-                                this.getColData();
-                            }
-                        }
-                    },
-                    // 显示公告详情
-                    showAnnouncementDetail(announcement) {
-                        this.currentAnnouncement = announcement;
-                        this.showAnnouncementDetailPop = true;
-                    },
-                    // 关闭公告详情
-                    closeAnnouncementDetail(e) {
-                        e.preventDefault(); // 阻止默认行为，否则页面会自动回到顶端
-                        this.showAnnouncementDetailPop = false;
-                    },
-                    getReserveData() {
-                        post('/reserve/listMsReserveClient', this.queryInfo)
-                            .then(response => {
-                                if (response.code === 200) {
-                                    this.reserveData = response.data.list || [];
-                                    this.total = response.data.total;
-                                    this.hasNextPage = this.queryInfo.pagenum * this.queryInfo.pagesize < this.total;
-                                } else {
-                                    alert(response.msg);
-                                }
-                            })
-                            .catch(err => {
-                                console.log(err);
-                            });
-                    },
-                    showReserveDetail(reserve) {
-                        this.currentReserve = reserve;
-                        this.showReserveDetailPop = true;
-                        
-                       
-                        this.$nextTick(() => {
-                            
-                            const chartDom = document.getElementById('reserveChart');
-                            if (!chartDom) return;
-                            
-                            const myChart = echarts.init(chartDom);
-                            
-                            const pieData = [
-                                { value: reserve.resSum - reserve.resdSum, name: '可预约' },
-                                { value: reserve.resdSum, name: '已预约' }
-                            ];
-                            
-                            const option = {
-                                tooltip: {
-                                    trigger: 'item',
-                                    formatter: '{b}: {c} ({d}%)'
-                                },
-                                legend: {
-                                    orient: 'horizontal',
-                                    bottom: 0,
-                                    data: ['可预约', '已预约']
-                                },
-                                series: [
-                                    {
-                                        type: 'pie',
-                                        radius: ['40%', '70%'],
-                                        avoidLabelOverlap: false,
-                                        label: {
-                                            show: true,
-                                            position: 'inside',
-                                            formatter: '{d}%',
-                                            fontSize: 14
-                                        },
-                                        emphasis: {
-                                            label: {
-                                                show: true,
-                                                fontSize: 16,
-                                                fontWeight: 'bold'
-                                            }
-                                        },
-                                        labelLine: {
-                                            show: false
-                                        },
-                                        data: pieData,
-                                        color: ['#2a7904', 'rgba(112,53,23,0.84)']
-                                    }
-                                ]
-                            };
-                            
-                            myChart.setOption(option);
-                            
-                            
-                            window.addEventListener('resize', function() {
-                                myChart.resize();
-                            });
-                        });
-                    },
-                    closeReserveDetail() {
-                        this.showReserveDetailPop = false;
-                    },
-                    goToReserve(reserveId) {
-                        if (!this.userInf || !this.userInf.id) {
-                            alert('请先登录');
-                            window.location.href = 'login.html';
-                            return;
-                        }
-                        
-                        // Show loading state
-                        const button = event.target;
-                        const originalText = button.innerText;
-                        button.disabled = true;
-                        button.innerText = '预约中...';
-                        
-                        // Call the API to create reservation directly
-                        post(`/reserveDetail/addDetailQuick/${reserveId}`)
-                            .then(response => {
-                                if (response.code === 200) {
-                                    alert('预约成功！');
-                                    // Close the popup
-                                    this.showReserveDetailPop = false;
-                                    // Refresh the reserve data to update counts
-                                    this.getReserveData();
-                                
-                                } else {
-                                    // Show error message
-                                    alert('预约失败: ' + (response.msg || '未知错误'));
-                                    // Reset button
-                                    button.disabled = false;
-                                    button.innerText = originalText;
-                                }
-                            })
-                            .catch(err => {
-                                console.error('预约请求出错:', err);
-                                alert('预约失败，请稍后重试');
-                                // Reset button
-                                button.disabled = false;
-                                button.innerText = originalText;
-                            });
-                    },
-                }
-            })
+        <div class="section-subscribe">
+            <div class="subcontainer">
+                <div class="subrow">
+                    <div class="subcol">
+                        <div class="section-title">留言建议</div>
+                        <div class="mail-subscribe-box">
+                            <form name="subsribe">
+                                <input v-model="feedContext" class="form-control" name="user-email" placeholder="如需改进，欢迎小主反馈...." value="" type="email">
+                                <button @click="sendFeedBack()" type="button" class="submitsub"> <i class="fa fa-angle-right"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-subscribe">
+                <img src="img/image.jpg" alt="banner">
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- .Content  -->
+<!-- 底部面板  -->
+<div class="bottom-panel">
+    <div class="bp-col">
+        <a href="index.html">
+            <div class="bp-icon"><img src="img/iphome.png" alt="icon"> </div>
+            <div class="selected-bottom-text">首页</div>
+        </a>
+    </div>
+    <div class="bp-col">
+        <a href="col-list.html">
+            <div class="bp-icon"><img src="img/ipoffer2.png" alt="icon"></div>
+            <div class="bp-text">藏品</div>
+        </a>
+    </div>
+    <div class="bp-col">
+        <a href="ReserveDetail.html">
+            <div class="bp-icon"><img src="img/ipcar.png" alt="icon"></div>
+            <div class="bp-text">我的预约</div>
+        </a>
+    </div>
+    <div class="bp-col">
+        <a href="setting.html">
+            <div class="bp-icon"><img src="img/ipaccount.png" alt="icon"></div>
+            <div class="bp-text">个人中心</div>
+        </a>
+    </div>
+</div>
+<!-- .Bottom Panel  -->
+<div class="tour-monk-float">
+    <a href="ChatTest.html" class="tour-monk-link" title="点击开始AI智能导览">
+        <img src="img/tourMonk1.png" alt="导览僧" class="monk-image">
+        <div class="monk-text">导览僧</div>
+    </a>
+</div>
+<div class="overlay"></div>
+<!-- Optional JavaScript -->
+<!-- jQuery v3.4.1 -->
+<script src="lib/jquery/jquery-3.4.1.min.js"></script>
+<!--  Bootstrap v4.3.1 JS -->
+<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+<!-- Magnific Popup core JS file -->
+<script src="lib/Magnific-Popup-master/dist/jquery.magnific-popup.js"></script>
+<!-- Slick JS -->
+<script src="lib/slick/slick/slick.min.js"></script>
+<!--  Custom JS -->
+<script src="js/theme.js"></script>
 
-            const vm2 = new Vue({
-                el: '#loginVue',
-                data: {
-                    userInf: {} // 用户信息从接口获取
-                },
-                mounted() {
-                    // 添加mounted钩子，获取用户信息
-                    this.fetchUserInfo();
-                },
-                methods: {
-                    // 获取用户信息
-                    fetchUserInfo() {
-                        const token = sessionStorage.getItem('token');
-                        if (!token) {
-                            this.userInf = {};
-                            return;
-                        }
-                        
-                        get('/user/me').then(response => {
-                            if (response.code === 200 && response.data) {
+<script src="lib/elementui/element.js"></script>
+<script src="lib/elementui/css/element.css"></script>
+<script>
+    const vm = new Vue({
+        el: '#app',
+        data: {
+            menuData: [
+                { id: 1, name: '近期新闻公告' },
+                { id: 2, name: '预约一览' },
+                { id: 3, name: '藏品一览' },
+                { id: 4, name: '热门藏品' },
+                { id: 5, name: '历史人文' }
+            ],
+            userInf: {}, // 用户信息从接口获取
+            showAnnooucementPop: false,
+            annoObj: {},
+            menuId: 1,
+            colTyps : [],
+            collectionData : [],
+            queryInfo: {
+                name: '',
+                pagenum: 1,
+                pagesize: 5,  // 每页显示6条公告
+                menuName: '藏品一览'
+            },
+            feedContext: '',
+            isNewsDesc: false,
+            collectionDataDesc: {},
+            resSum: 0,
+            resdSum: 0,
+            feedContext: '',
+            showReservePop: false,
+            popHtml: '',
+            announcementData: [], // 存储公告列表数据
+            announcementList: [],    //存储置顶公告数据
+            total: 0,        // 总记录数
+            hasNextPage: true, // 是否有下一页
+            showAnnouncementDetailPop: false,  // 控制详情弹窗显示
+            currentAnnouncement: {},           // 当前查看的公告
+            showReserveDetailPop: false,
+            currentReserve: {},
+            reserveData: [],
+            // 历史人文新闻数据
+            newsData: [], // 存储新闻批次数据
+            newsLoading: false, // 新闻加载状态
+        },
+        mounted() {
+            this.getData()
+            this.getAnnouncementData()
+            this.getColData()
+            this.fetchUserMe() // 获取用户信息
+            this.getAnnouncementList()
+        },
+        methods: {
+            fetchUserMe() {
+                try {
+                    // 从 sessionStorage 中读取 token
+                    const token = sessionStorage.getItem('token');
+                    console.log('当前token为： ', token)
+                    // 如果 token 为空，表示当前为游客模式，不调用 me 接口
+                    if (!token) {
+                        console.log('未检测到 token，当前为游客模式');
+                        this.userInf = {}; // 确保用户信息为空对象
+                        return;
+                    }
+
+                    // 调用 /api/user/me 接口获取用户信息
+                    get('/user/me').then(response => {
+                        // 检查接口返回的状态码
+                        if (response.code === 200) {
+                            if (response.data) {
+                                // 有用户数据，表示已登录
                                 this.userInf = response.data;
+                                console.log('已获取用户信息:', this.userInf);
                             } else {
-                                this.userInf = {};
+                                // 数据为空，表示 token 可能无效或过期
+                                console.log('未获取到用户登录信息，当前为游客模式');
+                                this.userInf = {}; // 清空用户信息
                             }
-                        }).catch(error => {
-                            console.error('获取用户信息失败:', error);
-                            this.userInf = {};
-                        });
-                    },
-                    // 修改退出登录方法
-                    async loginOut() {
-                        try {
-                            // 调用后端接口使 token 失效
-                            await post('/user/logout');
-                        } catch (error) {
-                            console.error('退出失败:', error);
-                        } finally {
-                            // 清除本地 token
-                            sessionStorage.removeItem('token');
-                            // 跳转到登录页
-                            window.location.href = 'login.html';
+                        } else {
+                            // 请求成功但返回了错误码
+                            console.error('请求失败:', response.msg);
+                            this.userInf = {}; // 清空用户信息
+                        }
+                    }).catch(error => {
+                        // 网络错误或后端异常
+                        console.error('获取用户信息时发生异常:', error);
+                        this.userInf = {}; // 清空用户信息
+                    });
+                } catch (error) {
+                    console.error('fetchUserMe方法执行出错:', error);
+                    this.userInf = {}; // 确保用户信息为空对象
+                }
+            },
+            checkMenu(item) {
+                this.menuId = item.id
+                this.queryInfo.menuName = item.name
+
+                if (item.id === 1) {
+                    // 近期新闻公告
+                    this.queryInfo.pagenum = 1;
+                    this.getAnnouncementData();
+                } else if (item.id === 2) {
+                    // 预约一览
+                    this.queryInfo.pagenum = 1;
+                    this.getReserveData();
+                } else if (item.id === 3 || item.id === 4) {
+                    // 藏品一览或热门藏品
+                    this.queryInfo.pagenum = 1;
+                    this.getColData();
+                } else if (item.id === 5) {
+                    // 历史人文
+                    this.getNewsData();
+                }
+            },
+            showPop(item) {
+                this.showReservePop = true
+                this.popHtml = item.resDes
+            },
+            getData() {
+                post('/dic/listColType', {dicTyp: '藏品分类'}).then(response => {
+                    this.colTyps = response.data;
+                }).catch(err => {
+                    console.log(err);
+                });
+            },
+            async getAnnouncementList() {
+                post('/announcement/listMsAnnouncementTop', {}).then(res => {
+                    if (res.code !== 200) {
+                        alert(res.msg)
+                        return
+                    }else {
+                        this.announcementList = res.data.list
+                        if(this.announcementList && this.announcementList.length > 0) {
+                            this.showAnnooucementPop = true
+                            this.annoObj = this.announcementList[0]
                         }
                     }
+                }).catch(err => {
+                    console.log(err);
+                });
+            },
+            getColData() {
+                post('/collect/getdataTop', this.queryInfo).then(response => {
+                    this.collectionData = response.data.list;
+                }).catch(err => {
+                    console.log(err);
+                });
+            },
+            gotoDetial(category) {
+                console.log('点击分类:', category);
+                // 使用encodeURIComponent确保中文等特殊字符被正确编码
+                window.location.href = 'col-list.html?type=' + encodeURIComponent(category);
+            },
+            sendFeedBack(value) {
+                const token = sessionStorage.getItem('token')
+                if(token === null || token === '') {
+                    window.location.href='login.html'
+                    return
                 }
-            })
+                // 从 userInf 中获取用户信息
+                if (!this.userInf || !this.userInf.id) {
+                    alert('获取用户信息失败')
+                    return
+                }
+                if(this.feedContext === '') {
+                    alert('请输入留言信息')
+                    return;
+                }
+                const info = {
+                    userId: this.userInf.id,
+                    cateId: '',
+                    feedContent: this.feedContext,
+                    userName: this.userInf.username
+                }
+                post('/feedBack/addFeedBack', info).then(response => {
+                    alert('成功！')
+                    this.feedContext = ''
+                }).catch(err => {
+                    console.log(err);
+                });
+            },
+            getAnnouncementData() {
+                post('/announcement/listMsAnnouncement', this.queryInfo)
+                    .then(response => {
+                        if (response.code === 200) {
+                            this.announcementData = response.data.list || [];
+                            this.total = response.data.total;
+                            this.hasNextPage = this.queryInfo.pagenum * this.queryInfo.pagesize < this.total;
+                        } else {
+                            alert(response.msg);
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            },
+            // 上一页
+            prevPage() {
+                if (this.queryInfo.pagenum > 1) {
+                    this.queryInfo.pagenum--;
+                    if (this.menuId === 1) {
+                        this.getAnnouncementData();
+                    } else if (this.menuId === 2) {
+                        this.getReserveData();
+                    } else {
+                        this.getColData();
+                    }
+                }
+            },
+            // 下一页
+            nextPage() {
+                if (this.hasNextPage) {
+                    this.queryInfo.pagenum++;
+                    if (this.menuId === 1) {
+                        this.getAnnouncementData();
+                    } else if (this.menuId === 2) {
+                        this.getReserveData();
+                    } else {
+                        this.getColData();
+                    }
+                }
+            },
+            // 显示公告详情
+            showAnnouncementDetail(announcement) {
+                this.currentAnnouncement = announcement;
+                this.showAnnouncementDetailPop = true;
+            },
+            // 关闭公告详情
+            closeAnnouncementDetail(e) {
+                e.preventDefault(); // 阻止默认行为，否则页面会自动回到顶端
+                this.showAnnouncementDetailPop = false;
+            },
+            getReserveData() {
+                post('/reserve/listMsReserveClient', this.queryInfo)
+                    .then(response => {
+                        if (response.code === 200) {
+                            this.reserveData = response.data.list || [];
+                            this.total = response.data.total;
+                            this.hasNextPage = this.queryInfo.pagenum * this.queryInfo.pagesize < this.total;
+                        } else {
+                            alert(response.msg);
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            },
+            showReserveDetail(reserve) {
+                this.currentReserve = reserve;
+                this.showReserveDetailPop = true;
 
 
-        </script>
-        
+                this.$nextTick(() => {
+
+                    const chartDom = document.getElementById('reserveChart');
+                    if (!chartDom) return;
+
+                    const myChart = echarts.init(chartDom);
+
+                    const pieData = [
+                        { value: reserve.resSum - reserve.resdSum, name: '可预约' },
+                        { value: reserve.resdSum, name: '已预约' }
+                    ];
+
+                    const option = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{b}: {c} ({d}%)'
+                        },
+                        legend: {
+                            orient: 'horizontal',
+                            bottom: 0,
+                            data: ['可预约', '已预约']
+                        },
+                        series: [
+                            {
+                                type: 'pie',
+                                radius: ['40%', '70%'],
+                                avoidLabelOverlap: false,
+                                label: {
+                                    show: true,
+                                    position: 'inside',
+                                    formatter: '{d}%',
+                                    fontSize: 14
+                                },
+                                emphasis: {
+                                    label: {
+                                        show: true,
+                                        fontSize: 16,
+                                        fontWeight: 'bold'
+                                    }
+                                },
+                                labelLine: {
+                                    show: false
+                                },
+                                data: pieData,
+                                color: ['#2a7904', 'rgba(112,53,23,0.84)']
+                            }
+                        ]
+                    };
+
+                    myChart.setOption(option);
+
+
+                    window.addEventListener('resize', function() {
+                        myChart.resize();
+                    });
+                });
+            },
+            closeReserveDetail() {
+                this.showReserveDetailPop = false;
+            },
+            goToReserve(reserveId) {
+                if (!this.userInf || !this.userInf.id) {
+                    alert('请先登录');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Show loading state
+                const button = event.target;
+                const originalText = button.innerText;
+                button.disabled = true;
+                button.innerText = '预约中...';
+
+                // Call the API to create reservation directly
+                post(`/reserveDetail/addDetailQuick/${reserveId}`)
+                    .then(response => {
+                        if (response.code === 200) {
+                            alert('预约成功！');
+                            // Close the popup
+                            this.showReserveDetailPop = false;
+                            // Refresh the reserve data to update counts
+                            this.getReserveData();
+
+                        } else {
+                            // Show error message
+                            alert('预约失败: ' + (response.msg || '未知错误'));
+                            // Reset button
+                            button.disabled = false;
+                            button.innerText = originalText;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('预约请求出错:', err);
+                        alert('预约失败，请稍后重试');
+                        // Reset button
+                        button.disabled = false;
+                        button.innerText = originalText;
+                    });
+             },
+             // 获取历史人文新闻数据
+             getNewsData() {
+                 this.newsLoading = true;
+                 get('/news/list').then(response => {
+                     if (response.code === 200) {
+                         this.newsData = response.data || [];
+                         console.log('获取新闻数据成功:', this.newsData);
+                     } else {
+                         console.error('获取新闻数据失败:', response.msg);
+                         this.newsData = [];
+                     }
+                 }).catch(error => {
+                     console.error('获取新闻数据异常:', error);
+                     this.newsData = [];
+                 }).finally(() => {
+                     this.newsLoading = false;
+                 });
+             },
+             // 格式化新闻时间
+             formatNewsDate(dateStr) {
+                 if (!dateStr) return '';
+                 try {
+                     const date = new Date(dateStr);
+                     return date.toLocaleDateString('zh-CN', {
+                         year: 'numeric',
+                         month: '2-digit',
+                         day: '2-digit',
+                         hour: '2-digit',
+                         minute: '2-digit'
+                     });
+                 } catch (error) {
+                     return dateStr;
+                 }
+             },
+             // 格式化批次时间
+             formatBatchTime(batchTime) {
+                 if (!batchTime) return '';
+                 try {
+                     const date = new Date(batchTime);
+                     return date.toLocaleDateString('zh-CN', {
+                         year: 'numeric',
+                         month: '2-digit',
+                         day: '2-digit'
+                     });
+                 } catch (error) {
+                     return batchTime;
+                 }
+             }
+         }
+     })
+
+     const vm2 = new Vue({
+        el: '#loginVue',
+        data: {
+            userInf: {} // 用户信息从接口获取
+        },
+        mounted() {
+            // 添加mounted钩子，获取用户信息
+            this.fetchUserInfo();
+        },
+        methods: {
+            // 获取用户信息
+            fetchUserInfo() {
+                const token = sessionStorage.getItem('token');
+                if (!token) {
+                    this.userInf = {};
+                    return;
+                }
+
+                get('/user/me').then(response => {
+                    if (response.code === 200 && response.data) {
+                        this.userInf = response.data;
+                    } else {
+                        this.userInf = {};
+                    }
+                }).catch(error => {
+                    console.error('获取用户信息失败:', error);
+                    this.userInf = {};
+                });
+            },
+            // 修改退出登录方法
+            async loginOut() {
+                try {
+                    // 调用后端接口使 token 失效
+                    await post('/user/logout');
+                } catch (error) {
+                    console.error('退出失败:', error);
+                } finally {
+                    // 清除本地 token
+                    sessionStorage.removeItem('token');
+                    // 跳转到登录页
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+    })
+
+
+</script>
+
 </body>
 </html>
