@@ -4,16 +4,17 @@ import com.museum.domain.enums.IntentType;
 import dev.langchain4j.community.model.dashscope.QwenChatModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class IntentClassifierServiceImpl implements IntentClassifierService {
 
     private static final Logger log = LoggerFactory.getLogger(IntentClassifierServiceImpl.class);
-    private final QwenChatModel chatModel;
+    private final QwenChatModel simpleModel;
 
-    public IntentClassifierServiceImpl(QwenChatModel chatModel) {
-        this.chatModel = chatModel;
+    public IntentClassifierServiceImpl(@Qualifier("simpleQwenChatModel") QwenChatModel simpleModel) {
+        this.simpleModel = simpleModel;
     }
 
     @Override
@@ -23,7 +24,7 @@ public class IntentClassifierServiceImpl implements IntentClassifierService {
         log.debug("意图分类 - 用户输入: {}", userInput);
         log.debug("意图分类 - 发送给LLM的prompt: {}", prompt);
         
-        String result = chatModel.generate(prompt);
+        String result = simpleModel.generate(prompt);
         String normalized = result.trim().toUpperCase();
         
         log.debug("意图分类 - LLM原始回复: {}", result);

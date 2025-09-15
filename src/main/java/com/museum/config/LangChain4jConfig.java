@@ -12,8 +12,14 @@ public class LangChain4jConfig {
     @Value("${langchain4j.dashscope.api-key:}")
     private String dashScopeApiKey;
 
-    @Value("${langchain4j.dashscope.model.chat:qwen-turbo}")
+    @Value("${langchain4j.dashscope.model.chat:qwen-plus}")
     private String chatModelName;
+
+    @Value("${langchain4j.dashscope.model.simple:qwen-plus}")
+    private String simpleModelName;
+
+    @Value("${langchain4j.dashscope.model.complex:qwen3-235b-a22b}")
+    private String complexModelName;
 
     @Value("${langchain4j.dashscope.model.embedding:text-embedding-v1}")
     private String embeddingModelName;
@@ -23,6 +29,22 @@ public class LangChain4jConfig {
         return QwenChatModel.builder()
                 .apiKey(dashScopeApiKey)
                 .modelName(chatModelName)
+                .build();
+    }
+
+    @Bean("simpleQwenChatModel")
+    public QwenChatModel simpleQwenChatModel() {
+        return QwenChatModel.builder()
+                .apiKey(dashScopeApiKey)
+                .modelName(simpleModelName)
+                .build();
+    }
+
+    @Bean("complexQwenChatModel")
+    public QwenChatModel complexQwenChatModel() {
+        return QwenChatModel.builder()
+                .apiKey(dashScopeApiKey)
+                .modelName(complexModelName)
                 .build();
     }
 

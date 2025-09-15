@@ -44,7 +44,9 @@ langchain4j:
   dashscope:
     api-key: sk-b6880b99b30a46d7832d5cc51fd0a9d4
     model:
-      chat: qwen-plus
+      chat: qwen-plus-2025-09-11                    # 默认模型
+      simple: qwen-max                  # 简单问题模型（规则类）
+      complex: qwen-flash-2025-07-28          # 复杂问题模型（文化、推荐类）
       embedding: text-embedding-v1
   chroma:
     enabled: true          # 设为 true 启用 Chroma，false 使用内存存储
@@ -63,10 +65,7 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
-  file:
-    name: logs/museum-server.log           # 日志文件路径
-    max-size: 100MB                        # 单个日志文件最大大小
-    max-history: 30                        # 保留日志文件天数
+
 
 
 
