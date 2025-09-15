@@ -51,7 +51,8 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/dic/listColType",
                         "/userClient/**",
                         "/admin/**",
-                        "/news/**"
+                        "/news/**",
+                        "/guide-agent/**"
 
                 ).order(1);
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
