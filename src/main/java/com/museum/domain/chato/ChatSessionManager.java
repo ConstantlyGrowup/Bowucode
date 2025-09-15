@@ -13,7 +13,7 @@ public class ChatSessionManager {
         sessions.compute(sessionId, (key, messages) -> {
             if (messages == null) {
                 messages = new CopyOnWriteArrayList<>();
-                messages.add(Message.builder().role("system").content(Constant.CONSTRAIN_SYSTEM_ROLE).build());
+                messages.add(Message.builder().role("system").content(Constant.CONSTRAIN_SYSTEM_ROLE_new).build());
                 messages.add(Message.builder().role("assistant").content(Constant.CONSTRAIN_ASSISTANT_WELCOME).build());
             }
             messages.add(message);

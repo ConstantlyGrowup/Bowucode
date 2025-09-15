@@ -43,6 +43,9 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
     private CacheClient cacheClient;
     @Resource
     private RedissonClient redissonClient;
+    
+    @Resource
+    private com.museum.service.impl.agent.VectorSyncService vectorSyncService;
 
 
 
@@ -177,6 +180,15 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
             if(success)
             {
                 log.info("更新id:{}藏品信息成功！",collection.getId());
+                // 异步同步向量数据库
+                CACHE_REBUILD_EXECUTOR.submit(() -> {
+                    try {
+                        vectorSyncService.syncAllCollections();
+                        log.info("藏品修改后向量数据同步完成");
+                    } catch (Exception e) {
+                        log.error("藏品修改后向量数据同步失败: {}", e.getMessage());
+                    }
+                });
             }else
             {
                 log.info("更新id:{}藏品信息失败！",collection.getId());
@@ -196,6 +208,16 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
         RBloomFilter<Object> bloomFilter = redissonClient.getBloomFilter(BLOOM_COLLECT);
         bloomFilter.add(collection.getId());
         log.info("id:{} 已经被加入到布隆过滤器",collection.getId());
+        
+        // 异步同步向量数据库
+        CACHE_REBUILD_EXECUTOR.submit(() -> {
+            try {
+                vectorSyncService.syncAllCollections();
+                log.info("藏品添加后向量数据同步完成");
+            } catch (Exception e) {
+                log.error("藏品添加后向量数据同步失败: {}", e.getMessage());
+            }
+        });
     }
 
     /**
@@ -211,6 +233,16 @@ public class CollectionService extends ServiceImpl<CollectionMapper, MsCollectio
         removeById(id);
         //操作缓存
         stringRedisTemplate.delete(CACHE_COLLECT+id);
+        
+        // 异步同步向量数据库
+        CACHE_REBUILD_EXECUTOR.submit(() -> {
+            try {
+                vectorSyncService.syncAllCollections();
+                log.info("藏品删除后向量数据同步完成");
+            } catch (Exception e) {
+                log.error("藏品删除后向量数据同步失败: {}", e.getMessage());
+            }
+        });
     }
 
     /**

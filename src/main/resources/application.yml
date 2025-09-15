@@ -40,6 +40,33 @@ minio:
 workflow:
   token: "history-workflow"
 
+langchain4j:
+  dashscope:
+    api-key: sk-b6880b99b30a46d7832d5cc51fd0a9d4
+    model:
+      chat: qwen-plus
+      embedding: text-embedding-v1
+  chroma:
+    enabled: true          # 设为 true 启用 Chroma，false 使用内存存储
+    host: localhost
+    port: 8000
+    collection-name: museum-collection
+
+# 日志配置
+logging:
+  level:
+    root: INFO                              # 根日志级别
+    com.museum: DEBUG                       # 您的应用包日志级别设为DEBUG
+    com.museum.service.impl.agent: DEBUG   # Agent服务的详细调试日志
+    dev.langchain4j: INFO                   # LangChain4j框架日志
+    org.springframework: INFO              # Spring框架日志
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/museum-server.log           # 日志文件路径
+    max-size: 100MB                        # 单个日志文件最大大小
+    max-history: 30                        # 保留日志文件天数
 
 
 
