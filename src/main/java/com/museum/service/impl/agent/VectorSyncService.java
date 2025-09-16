@@ -177,7 +177,7 @@ public class VectorSyncService {
     }
 
     /**
-     * 清空向量数据库中的所有数据
+     * 清空向量数据库中的所有数据（使用PUT方式清空集合内容，保持集合ID不变）
      */
     private void clearVectorData() {
         if (!chromaEnabled) {
@@ -186,27 +186,40 @@ public class VectorSyncService {
         }
 
         try {
-            // 1. 先检查集合是否存在
-            if (!checkCollectionExists()) {
-                log.info("Chroma 集合 {} 不存在，跳过删除操作", collectionName);
+            // 1. 先获取集合ID
+            String collectionId = getCollectionId();
+            if (collectionId == null) {
+                log.info("Chroma 集合 {} 不存在，无需清空", collectionName);
                 return;
             }
 
-            // 2. 如果存在，则删除集合
+            // 2. 使用PUT方式清空集合内容（保持集合ID不变）
             String baseUrl = buildBaseUrl();
-            String url = baseUrl + "api/v1/collections/" + collectionName + 
-                        "?tenant=default_tenant&database=default_database";
+            String url = baseUrl + "api/v1/collections/" + collectionId;
+            
+            // 构造空的数据体来清空集合
+            String emptyCollectionData = """
+                {
+                    "documents": [],
+                    "embeddings": [],
+                    "metadatas": [],
+                    "ids": []
+                }
+                """;
+            
+            MediaType JSON = MediaType.get("application/json; charset=utf-8");
+            RequestBody body = RequestBody.create(emptyCollectionData, JSON);
             
             Request request = new Request.Builder()
                     .url(url)
-                    .delete()
+                    .put(body)
                     .build();
 
             try (Response response = httpClient.newCall(request).execute()) {
                 if (response.isSuccessful()) {
-                    log.info("成功删除 Chroma 集合: {}", collectionName);
+                    log.info("成功清空 Chroma 集合内容: {} (ID: {})", collectionName, collectionId);
                 } else {
-                    log.warn("删除 Chroma 集合失败，状态码: {}, 响应: {}", 
+                    log.warn("清空 Chroma 集合内容失败，状态码: {}, 响应: {}", 
                             response.code(), 
                             response.body() != null ? response.body().string() : "无响应体");
                 }
@@ -217,9 +230,9 @@ public class VectorSyncService {
     }
 
     /**
-     * 检查Chroma集合是否存在
+     * 获取集合ID
      */
-    private boolean checkCollectionExists() {
+    private String getCollectionId() {
         try {
             String baseUrl = buildBaseUrl();
             String collectionUrl = baseUrl + "api/v1/collections/" + collectionName;
@@ -230,21 +243,27 @@ public class VectorSyncService {
                     .build();
 
             try (Response response = httpClient.newCall(collectionRequest).execute()) {
-                if (response.isSuccessful()) {
-                    log.debug("Chroma 集合 {} 存在", collectionName);
-                    return true;
+                if (response.isSuccessful() && response.body() != null) {
+                    String responseBody = response.body().string();
+                    log.debug("Collection info: {}", responseBody);
+                    
+                    // 简单的JSON解析获取ID
+                    int idStart = responseBody.indexOf("\"id\":\"") + 6;
+                    int idEnd = responseBody.indexOf("\"", idStart);
+                    if (idStart > 5 && idEnd > idStart) {
+                        String collectionId = responseBody.substring(idStart, idEnd);
+                        log.debug("Found collection ID: {}", collectionId);
+                        return collectionId;
+                    }
                 } else if (response.code() == 404) {
-                    log.debug("Chroma 集合 {} 不存在", collectionName);
-                    return false;
-                } else {
-                    log.warn("检查集合存在性失败，状态码: {}", response.code());
-                    return false;
+                    log.debug("集合 {} 不存在", collectionName);
+                    return null;
                 }
             }
         } catch (Exception e) {
-            log.debug("检查集合存在性时发生异常: {}", e.getMessage());
-            return false;
+            log.debug("获取集合ID失败: {}", e.getMessage());
         }
+        return null;
     }
 
     /**

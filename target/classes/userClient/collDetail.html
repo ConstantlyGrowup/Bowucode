@@ -426,17 +426,22 @@
                             resTime: val.resTime,
                             resSession: val.resSession
                         }
-                        
-                        post('/reserveDetail/addDetail', detail).then(response => {
-                            if(response.code === 200) {
-                                alert('成功')
-                                this.loadData()
-                            }else {
-                                alert(response.msg)
-                            }
-                        }).catch(err => {
-                            console.log(err);
-                        });
+
+                        // 拼接 reserveId 到 URL 中
+                        post(`/reserveDetail/addDetailQuick/${detail.resId}`)
+                            .then(response => {
+                                if (response.code === 200) {
+                                    alert('预约成功！');
+                                    this.loadData();
+                                } else {
+                                    // Show error message
+                                    alert('预约失败: ' + (response.msg || '未知错误'));
+                                }
+                            })
+                            .catch(err => {
+                                console.error('预约请求出错:', err);
+                                alert('预约失败，请稍后重试');
+                            });
                     },
                     sendFeedBack(value) {
                         const token = sessionStorage.getItem('token')
