@@ -35,7 +35,7 @@ public class RecommendTool implements Tool {
     public String execute(String userInput, String sessionId) {
         log.info("RecommendTool执行 - 使用复杂模型(qwen3-235b-a22b)处理推荐问题");
         
-        // 这里将 sessionId 视作 userId 使用（如需不同来源，可在上层传入 userId）
+        // 这里将 sessionId 解析成 userId  使用
         QueryWrapper<MsReserveDetail> qw = new QueryWrapper<>();
         qw.lambda().eq(MsReserveDetail::getUserId, sessionId).eq(MsReserveDetail::getVldStat, "1");
         List<MsReserveDetail> details = reserveDetialMapper.selectList(qw);
