@@ -70,6 +70,7 @@ public class IntentClassifierServiceImpl implements IntentClassifierService {
                 """ + userInput + """
                 
                 ## 要求：
+                如果你发现用户的意图难以琢磨，多半是超出了回答范围，直接路由到RULES（举例：我想了解你、我爱你、帮我写代码等等明显和场景无关的话语）
                 请仅返回以下三个选项之一，不要包含其他内容：
                 RULES
                 CULTURE  

@@ -186,6 +186,13 @@ public class VectorSyncService {
         }
 
         try {
+            // 1. 先检查集合是否存在
+            if (!checkCollectionExists()) {
+                log.info("Chroma 集合 {} 不存在，跳过删除操作", collectionName);
+                return;
+            }
+
+            // 2. 如果存在，则删除集合
             String baseUrl = buildBaseUrl();
             String url = baseUrl + "api/v1/collections/" + collectionName + 
                         "?tenant=default_tenant&database=default_database";
@@ -206,6 +213,37 @@ public class VectorSyncService {
             }
         } catch (Exception e) {
             log.warn("清空向量数据失败: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 检查Chroma集合是否存在
+     */
+    private boolean checkCollectionExists() {
+        try {
+            String baseUrl = buildBaseUrl();
+            String collectionUrl = baseUrl + "api/v1/collections/" + collectionName;
+            
+            Request collectionRequest = new Request.Builder()
+                    .url(collectionUrl)
+                    .get()
+                    .build();
+
+            try (Response response = httpClient.newCall(collectionRequest).execute()) {
+                if (response.isSuccessful()) {
+                    log.debug("Chroma 集合 {} 存在", collectionName);
+                    return true;
+                } else if (response.code() == 404) {
+                    log.debug("Chroma 集合 {} 不存在", collectionName);
+                    return false;
+                } else {
+                    log.warn("检查集合存在性失败，状态码: {}", response.code());
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            log.debug("检查集合存在性时发生异常: {}", e.getMessage());
+            return false;
         }
     }
 

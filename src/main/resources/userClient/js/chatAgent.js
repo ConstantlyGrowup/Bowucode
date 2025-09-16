@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
         sendButton.textContent = "思考中...";
         chatStatus.textContent = "导览僧正在思考您的问题...";
 
+        // 添加打字动画
+        const typingIndicator = addTypingIndicator();
+
         try {
             // 调用Agent API
             const response = await fetch('/api/guide-agent/chat', {
@@ -93,6 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const result = await response.text();
             
+            // 移除打字动画
+            removeTypingIndicator(typingIndicator);
+            
             // 记录助手回复
             messageHistory.push({
                 role: "assistant",
@@ -107,6 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error('Agent请求失败:', error);
             
+            // 移除打字动画
+            removeTypingIndicator(typingIndicator);
+            
             let errorMessage = "抱歉，导览僧暂时无法回答您的问题。";
             if (error.message.includes('401')) {
                 errorMessage = "您的登录已过期，请重新登录。";
@@ -119,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 errorMessage = "请求超时，请稍后再试。";
             }
             
-            addBotMessage(errorMessage);
+            addErrorMessage(errorMessage);
             chatStatus.textContent = "发生错误，请重试";
         } finally {
             // 重新启用输入和按钮
@@ -163,11 +172,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const messageText = document.createElement("div");
         messageText.classList.add("message-text");
 
-        // 将 Markdown 转换为 HTML
-        let htmlContent = marked.parse(message);
+        // 预处理消息内容，清理多余换行
+        let cleanedMessage = message
+            .replace(/\n{3,}/g, '\n\n')  // 将3个及以上连续换行替换为2个
+            .replace(/^\s+|\s+$/g, '')   // 去除首尾空白
+            .trim();
 
-        // 手动处理换行符
-        htmlContent = htmlContent.replace(/\n/g, '<br>');
+        // 将 Markdown 转换为 HTML
+        let htmlContent = marked.parse(cleanedMessage);
+
+        // 清理HTML中的多余空白
+        htmlContent = htmlContent
+            .replace(/<p>\s*<\/p>/g, '')           // 移除空的p标签
+            .replace(/<p><br\s*\/?><\/p>/g, '')    // 移除只包含br的p标签
+            .replace(/(<\/p>\s*){2,}/g, '</p>')    // 合并连续的p标签结束
+            .replace(/(<p>\s*){2,}/g, '<p>')       // 合并连续的p标签开始
+            .replace(/(<br\s*\/?>\s*){3,}/g, '<br><br>'); // 限制连续br标签最多2个
 
         messageText.innerHTML = htmlContent;
 
@@ -210,6 +230,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // 添加打字动画指示器
+    function addTypingIndicator() {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", "bot-message");
+
+        const avatarImg = document.createElement("img");
+        avatarImg.src = "img/monkTang.svg";
+        avatarImg.alt = "Bot Avatar";
+        avatarImg.classList.add("bot-avatar");
+
+        const typingDiv = document.createElement("div");
+        typingDiv.classList.add("typing-indicator");
+
+        const typingDots = document.createElement("div");
+        typingDots.classList.add("typing-dots");
+
+        // 创建三个点
+        for (let i = 0; i < 3; i++) {
+            const dot = document.createElement("div");
+            dot.classList.add("typing-dot");
+            typingDots.appendChild(dot);
+        }
+
+        typingDiv.appendChild(typingDots);
+        messageElement.appendChild(avatarImg);
+        messageElement.appendChild(typingDiv);
+
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        return messageElement;
+    }
+
+    // 移除打字动画指示器
+    function removeTypingIndicator(typingElement) {
+        if (typingElement && typingElement.parentNode) {
+            typingElement.parentNode.removeChild(typingElement);
+        }
+    }
+
     // 导出一些方法到全局，便于调试
     window.AgentChat = {
         getSessionId: () => sessionId,
@@ -218,6 +278,8 @@ document.addEventListener("DOMContentLoaded", () => {
         clearMessages: () => {
             chatMessages.innerHTML = '';
             messageHistory.length = 0;
-        }
+        },
+        addTypingIndicator: addTypingIndicator,
+        removeTypingIndicator: removeTypingIndicator
     };
 });
