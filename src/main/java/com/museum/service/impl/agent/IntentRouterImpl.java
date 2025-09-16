@@ -25,14 +25,14 @@ public class IntentRouterImpl {
         log.info("意图路由器初始化完成 - 已注册工具: {}", toolMap.keySet());
     }
 
-    public String route(IntentType intentType, String userInput, String sessionId) {
+    public String route(IntentType intentType, String userInput, String userId, String conversationContext) {
         Tool tool = toolMap.getOrDefault(intentType, toolMap.get(IntentType.RULES));
         String toolName = tool.getClass().getSimpleName();
         
         log.info("路由决策 - 意图: {} -> 工具: {}", intentType, toolName);
-        log.debug("执行工具 - 工具: {}, 用户输入: '{}', 会话ID: {}", toolName, userInput, sessionId);
+        log.debug("执行工具 - 工具: {}, 用户输入: '{}', 用户ID: {}", toolName, userInput, userId);
         
-        String result = tool.execute(userInput, sessionId);
+        String result = tool.execute(userInput, userId, conversationContext);
         
         log.info("工具执行完成 - 工具: {}, 响应长度: {} 字符", toolName, result.length());
         

@@ -26,8 +26,8 @@ public class RulesQATool implements Tool {
 
 
     @Override
-    public String execute(String userInput, String sessionId) {
-        log.info("RulesQATool执行 - 使用简单模型(qwen-plus)处理规则问题，sessionID: {}", sessionId);
+    public String execute(String userInput, String userId, String conversationContext) {
+        log.info("RulesQATool执行 - 使用简单模型(qwen-plus)处理规则问题，用户ID: {}", userId);
         //查询数据库得到近期所有公告
         QueryWrapper<MsAnnouncement> wrapper = new QueryWrapper<>();
         wrapper.lambda().isNotNull(MsAnnouncement::getContentText);
@@ -44,13 +44,18 @@ public class RulesQATool implements Tool {
         信息源: 所有回答必须严格基于提供的馆内规章制度文本。
         准确性: 你的回答必须是公告内容的准确复述或提炼，不允许任何形式的个人解读或信息添加。
         简洁明了: 直接回答问题，避免使用复杂的语言或与问题无关的额外信息。
+        对话上下文: 如果有之前的对话记录，可以参考但不要重复之前已回答的内容。
         5. 输出
         最终的回答将是公告内容的直接引用、提炼或转述，用于回答用户的具体规则问题。
 
+        对话历史：%s
         公告内容：%s,注意新开展览的公告
         用户问题：%s
         """;
-        return simpleModel.generate(prompt.formatted(announcementContent, userInput));
+        return simpleModel.generate(prompt.formatted(
+                conversationContext.isEmpty() ? "无" : conversationContext,
+                announcementContent, 
+                userInput));
     }
 }
 

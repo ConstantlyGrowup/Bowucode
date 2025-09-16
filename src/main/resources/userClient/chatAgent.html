@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="application/json;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古董展览馆智能导览僧</title>
+    <link rel="stylesheet" href="css/ChatTest.css">
+    <!-- 引入 marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入 Vue 和 Axios -->
+    <script src="./util/vue.js"></script>
+    <script src="./util/axios.js"></script>
+    <script src="./util/request.js"></script>
+</head>
+<body>
+<div id="app" class="background-gradient">
+    <header class="app-header">
+        <h1 style="color: rgba(223,148,3,0.73)">智能导览僧</h1>
+        <div class="cloud-decoration left-cloud"></div>
+        <div class="cloud-decoration right-cloud"></div>
+        <div style="position: absolute; top: 10px; right: 10px;">
+            <a href="index.html" class="return-button" style="display: inline-block; padding: 5px 10px; background-color: rgba(223,148,3,0.73); color: white; border-radius: 5px; text-decoration: none; font-size: 14px;">返回首页</a>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="chat-container">
+            <div id="chat-messages"></div>
+            <div class="chat-status" id="chat-status" style="text-align: center; padding: 10px; color: #666; font-size: 14px;">
+                <!-- 状态信息区域 -->
+            </div>
+            <form id="chat-form">
+                <input type="text" id="user-input" placeholder="请输入您的问题..." required>
+                <button type="submit" id="send-button">发送</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p style="font-size: larger">开放时间：工作日上午 9:00 - 下午 5:00</p>
+        <p>地址：桐梓坡路 | 电话：(010) 1145-1478</p>
+        <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #888;">
+            会话ID: <span id="session-display"></span>
+        </div>
+    </footer>
+</div>
+
+<script type="module" src="js/chatAgent.js"></script>
+<script>
+    // 添加鉴权检查
+    new Vue({
+        el: '#app',
+        data: {
+            userInfo: null,
+            sessionId: null
+        },
+        mounted() {
+            // 检查用户是否登录
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                alert('请先登录！');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 验证用户登录状态
+            this.checkLoginStatus();
+        },
+        methods: {
+            // 验证用户登录状态
+            checkLoginStatus() {
+                get('/user/me')
+                    .then(response => {
+                        if (response.code === 200 && response.data && response.data.id) {
+                            // 用户已登录，可以继续使用聊天功能
+                            this.userInfo = response.data;
+                            console.log('用户已登录:', response.data);
+                            
+                            // 生成sessionID：userID + 随机字符串
+                            this.sessionId = this.generateSessionId(response.data.id);
+                            document.getElementById('session-display').textContent = this.sessionId;
+                            
+                            // 将sessionId传递给聊天脚本
+                            window.chatSessionId = this.sessionId;
+                            window.userInfo = this.userInfo;
+                        } else {
+                            // 用户未登录或登录状态无效
+                            alert('请先登录！');
+                            window.location.href = 'login.html';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('获取用户信息失败:', err);
+                        alert('请先登录！');
+                        window.location.href = 'login.html';
+                    });
+            },
+            
+            // 生成sessionID: userID + "_" + 随机字符串
+            generateSessionId(userId) {
+                const randomString = this.generateRandomString(8);
+                return `${userId}_${randomString}`;
+            },
+            
+            // 生成随机字符串
+            generateRandomString(length) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+        }
+    });
+</script>
+</body>
+</html>

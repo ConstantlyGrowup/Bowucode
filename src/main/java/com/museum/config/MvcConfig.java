@@ -52,7 +52,8 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/userClient/**",
                         "/admin/**",
                         "/news/**",
-                        "/guide-agent/**"
+                        "/guide-agent/**",
+                        "/conversation/**"
 
                 ).order(1);
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
